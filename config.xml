@@ -16,16 +16,16 @@
 <configuration>
 	
 	<cluster>
-		<hostURL>http://192.168.25.27:8080/sagitarii/</hostURL>
-		<poolIntervalMilliSeconds>1000</poolIntervalMilliSeconds>
-		<activationsMaxLimit>5</activationsMaxLimit>
+		<hostURL>http://localhost:8580/sagitarii/</hostURL>
+		<poolIntervalMilliSeconds>500</poolIntervalMilliSeconds>
+		<activationsMaxLimit>50</activationsMaxLimit>
 		<activationShowConsole>false</activationShowConsole>
 		<rPath>C:/rJava/jri</rPath>
 		<clearDataAfterFinish>false</clearDataAfterFinish>
 		<CSVDelimiter>,</CSVDelimiter>
-		<storageHost>192.168.25.27</storageHost>
+		<storageHost>localhost</storageHost>
 		<storagePort>3333</storagePort>
-		<fileSenderDelay>600</fileSenderDelay>
+		<fileSenderDelay>200</fileSenderDelay>
 	</cluster>
 
 	<proxy>

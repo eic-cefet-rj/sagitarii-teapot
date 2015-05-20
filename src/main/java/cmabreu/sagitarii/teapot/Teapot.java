@@ -153,7 +153,7 @@ public class Teapot implements ITaskObserver {
 	* Recebe uma noficacao quando uma tarefa é concluída.
 	* Este método é propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
 	* que dispara ITaskObserver.notify() caso tenha sido chamado ITaskObserver.setObserver com um 
-	* observer válido (neste caso, o observer é esta classe.
+	* observer válido (neste caso, o observer é esta classe).
 	*/
 	@Override
 	public synchronized void notify( ITask task ) {
@@ -163,15 +163,19 @@ public class Teapot implements ITaskObserver {
 			// Check output file
 			validateProduct( act.getNamespace() );
 			// Send data and files
+
 			new Uploader(gf).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
-					act.getNamespace() , task, tm.getMacAddress() );
+					act.getNamespace() , task, tm );
+			
 			// Run next task in same instance (if exists)
 			executeNext( task );
 			// Clean up
-			sanitize( task ); 
+			sanitize( task );
+			
 		} catch ( Exception e ) {
 			sendErrorLog("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
 		}
+		
 	}
 
 	/**
@@ -437,7 +441,8 @@ public class Teapot implements ITaskObserver {
 	 * É chamado de tempos em tempos para enviar os dados da máquina ao Sagitarii.
 	 * Ao fazer isso, o Sagitarii poderá enviar uma nova tarefa.
 	 */
-	public void process() throws Exception {
+	public synchronized void process( String resposta ) throws Exception {
+		
 		if ( quiting ) {
 			// If we're here, is becaus the first call not finished (have tasks still running),
 			// so we'll try again
@@ -457,74 +462,57 @@ public class Teapot implements ITaskObserver {
 			return;
 		}
 		
-		int quantTasks = tm.getRunningTaskCount();
-		System.out.println( quantTasks + " <= " + gf.getActivationsMaxLimit() );
-		if ( quantTasks <= gf.getActivationsMaxLimit() ) {
-			
-			System.out.println("TEAPOT: Process");
-			
-			String resposta = comm.anuncia( tm.getCpuLoad() );
-			
-			System.out.println(" demoro ?");
-			
-			if ( ( !resposta.equals( "NO_ANSWER" ) ) && ( !resposta.equals( "COMM_ERROR" ) ) && ( !resposta.equals( "" ) ) ) {
-				if ( resposta.equals( "COMM_RESTART" ) ) {
-					logger.debug("get restart command from Sagitarii");
-					restart();
-				} else
-				if ( resposta.equals( "RELOAD_WRAPPERS" ) ) {
-					logger.debug("get reload wrappers command from Sagitarii");
-					reloadWrappers();
-				} else
-				if ( resposta.equals( "COMM_QUIT" ) ) {
-					logger.debug("get quit command from Sagitarii");
-					quit();
-				} else
-				if ( resposta.equals( "COMM_CLEAN_WORKSPACE" ) ) {
-					logger.debug("get clean workspace command from Sagitarii");
-					if ( tm.getRunningTaskCount() > 0 ) {
-						logger.debug("will not clean workspace. " + tm.getRunningTaskCount() + " tasks still runnig");
-					} else {
-						cleanUp();
-						logger.debug("workspace cleaned");
-					}
+		if ( ( !resposta.equals( "NO_ANSWER" ) ) && ( !resposta.equals( "COMM_ERROR" ) ) && ( !resposta.equals( "" ) ) ) {
+			if ( resposta.equals( "COMM_RESTART" ) ) {
+				logger.debug("get restart command from Sagitarii");
+				restart();
+			} else
+			if ( resposta.equals( "RELOAD_WRAPPERS" ) ) {
+				logger.debug("get reload wrappers command from Sagitarii");
+				reloadWrappers();
+			} else
+			if ( resposta.equals( "COMM_QUIT" ) ) {
+				logger.debug("get quit command from Sagitarii");
+				quit();
+			} else
+			if ( resposta.equals( "COMM_CLEAN_WORKSPACE" ) ) {
+				logger.debug("get clean workspace command from Sagitarii");
+				if ( tm.getRunningTaskCount() > 0 ) {
+					logger.debug("will not clean workspace. " + tm.getRunningTaskCount() + " tasks still runnig");
 				} else {
-					// Pipeline XML received from Sagitarii. Its time to work!
-					System.out.println("XXXXX 1");
+					cleanUp();
+					logger.debug("workspace cleaned");
+				}
+			} else {
+				// Pipeline XML received from Sagitarii. Its time to work!
+				
+				String pipelineSerial = "";
+				try {
 					
-					String pipelineSerial = "";
-					try {
-						
-						List<Activation> acts = parser.parseActivations( resposta );
-						executionQueue.addAll( acts );
-						System.out.println("XXXXX 2");
+					List<Activation> acts = parser.parseActivations( resposta );
+					executionQueue.addAll( acts );
 
-						for ( Activation act : acts ) {
-							if( act.getOrder() == 0 ) {
-								logger.debug("execute first activation in pipeline " + act.getPipelineSerial() );
-								pipelineSerial = act.getPipelineSerial();
-								executionQueue.remove(act);
-								String newCommand = generateCommand( act );
-								act.setCommand( newCommand );
-								saveInputData( act );
-								saveXmlData( act );
-
-								System.out.println("XXXXX 3");
-
-								runTask( act );
-								
-								System.out.println("XXXXX 4");
-
-								break;
-							}
+					for ( Activation act : acts ) {
+						if( act.getOrder() == 0 ) {
+							
+							logger.debug("execute first activation in pipeline " + act.getPipelineSerial() );
+							pipelineSerial = act.getPipelineSerial();
+							executionQueue.remove(act);
+							String newCommand = generateCommand( act );
+							act.setCommand( newCommand );
+							saveInputData( act );
+							saveXmlData( act );
+							runTask( act );
+							break;
 						}
-						
-					} catch (Exception e) {
-						comm.send("activityManagerReceiver", "pipelineId=" + pipelineSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
-						sendErrorLog( e.getMessage() );
 					}
+					
+				} catch (Exception e) {
+					comm.send("activityManagerReceiver", "pipelineId=" + pipelineSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
+					sendErrorLog( e.getMessage() );
 				}
 			}
+			
 		}
 		
 	}

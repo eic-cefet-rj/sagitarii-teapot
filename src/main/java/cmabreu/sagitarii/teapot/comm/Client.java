@@ -36,7 +36,7 @@ public class Client {
 	}
 	
 	
-	public synchronized void sendFile( String fileName, String folder, String targetTable, String experimentSerial,  
+	public void sendFile( String fileName, String folder, String targetTable, String experimentSerial,  
 			String macAddress, String pipelineSerial, String activity, String fragment ) throws Exception {
 
 		getSessionKey();

@@ -6,6 +6,7 @@ import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
 import cmabreu.taskmanager.core.ITask;
+import cmabreu.taskmanager.core.TaskManager;
 
 public class Uploader {
 	private Configurator gf; 
@@ -24,8 +25,10 @@ public class Uploader {
 	 * 
 	 * @throws IOException
 	 */
-	public synchronized void uploadCSV(String fileName, String relationName, String experimentSerial, 
-			String filesFolderName, ITask task, String macAddress) throws Exception {
+	public void uploadCSV(String fileName, String relationName, String experimentSerial, 
+			String filesFolderName, ITask task, TaskManager tm) throws Exception {
+		
+		String macAddress = tm.getMacAddress();
 		
 		logger.debug( "uploading " + fileName + " to " + relationName + " for experiment " + experimentSerial );
 		
@@ -39,9 +42,10 @@ public class Uploader {
 			fragment = task.getActivation().getFragment();
 		}		
 		
-		new Client(gf.getStorageHost(), gf.getStoragePort(), gf.getHostURL(), gf.getFileSenderDelay() ).sendFile( fileName, filesFolderName, 
-				relationName, experimentSerial, macAddress, pipelineSerial, activity, fragment );
-		
+		Client client = new Client(gf.getStorageHost(), gf.getStoragePort(), gf.getHostURL(), gf.getFileSenderDelay() );
+		client.sendFile( fileName, filesFolderName,	relationName, experimentSerial, macAddress, 
+				pipelineSerial, activity, fragment );
+
 		logger.debug( "done uploading " + fileName);
 
 	}

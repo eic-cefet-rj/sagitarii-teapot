@@ -22,7 +22,7 @@ public class DateLibrary {
 	}
 	
 	private DateLibrary() {
-		Date dNow = new Date( );
+		Date dNow = new Date();
 		ft = new SimpleDateFormat ("dd/MM/yyyy");
 		fc = new SimpleDateFormat ("dd 'de' MMMM 'de' yyyy");
 		ftm = new SimpleDateFormat ("dd/MM/yyyy HH:mm:ss");
@@ -111,7 +111,7 @@ public class DateLibrary {
 	}
 
 	public String getHourTextHuman() {
-		return fm.format( calendar.getTime() );
+		return fm.format( Calendar.getInstance().getTime() );
 	}
 	
 	public String getDateHourTextHuman( Date input ) {

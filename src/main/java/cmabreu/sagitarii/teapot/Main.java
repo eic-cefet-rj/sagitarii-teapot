@@ -1,6 +1,9 @@
 package cmabreu.sagitarii.teapot;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.comm.Downloader;
@@ -16,6 +19,7 @@ public class Main {
 	private static Teapot teapot;
 	private static Configurator gf;
 	private static boolean paused = false;
+	private static List<TaskRequester> requesters = new ArrayList<TaskRequester>();
 	
 	public static void pause() {
 		paused = true;
@@ -111,7 +115,7 @@ public class Main {
 					String experimentSerial = args[3];
 					String folderName = args[4];
 
-					new Uploader(gf).uploadCSV(fileName, relationName, experimentSerial, folderName, null, tm.getMacAddress() );
+					new Uploader(gf).uploadCSV(fileName, relationName, experimentSerial, folderName, null, tm );
 					
 					System.exit(0);
 				}
@@ -134,8 +138,8 @@ public class Main {
 			// =============================================================
 			
 			while (true) {
-				
-				System.out.println("MAIN: process");
+				logger.debug( requesters.size() + " of " + gf.getActivationsMaxLimit() + " tasks running" );
+				SpeedEqualizer.equalize( gf, requesters.size() );
 				
 				if ( !wrappersDownloaded ) {
 					try {
@@ -148,17 +152,23 @@ public class Main {
 					}
 				} else {
 					if ( !paused ) {
-						teapot.process();
+						
+						if ( requesters.size() < gf.getActivationsMaxLimit() ) {
+							logger.debug("thread slot available. requesting data from Sagitarii");
+							TaskRequester tr = new TaskRequester(comm, tm, teapot);
+							requesters.add(tr);
+							tr.start();
+						}
+						clearRequesters();
 					}
 				}
-				/*
+				
 				try {
-				    Thread.sleep( 300 );
-				    System.out.println("MAIN: will sleep " + gf.getPoolIntervalMilliSeconds() );
+				    Thread.sleep( gf.getPoolIntervalMilliSeconds() );
 				} catch( InterruptedException ex ) {
 				
 				}
-				*/			
+						
 			}
 			
 			
@@ -168,6 +178,20 @@ public class Main {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private static void clearRequesters() {
+		logger.debug("cleaning requesters...");
+		int total = 0;
+		Iterator<TaskRequester> i = requesters.iterator();
+		while ( i.hasNext() ) {
+			TaskRequester req = i.next(); 
+			if ( !req.isActive() ) {
+				i.remove();
+				total++;
+			}
+		}		
+		logger.debug( total + " requesters deleted" );
 	}
 
 }

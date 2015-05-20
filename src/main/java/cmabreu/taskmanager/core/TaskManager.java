@@ -197,20 +197,20 @@ public class TaskManager implements ITaskManager {
     
 	@Override
 	public int getRunningTaskCount() {
+		/* 
 		if ( runningTaskCount < 0 ) {
 			runningTaskCount = 0;
 		}
+		*/
+		runningTaskCount = this.tasks.size();
 		return runningTaskCount;
 	}
 
 	@Override
-	public String startTask( Activation activation , String applicationName ) {
+	public synchronized String startTask( Activation activation , String applicationName ) {
 		String pipelineId = activation.getPipelineSerial();
 		int order = activation.getOrder();
-		
-		DateLibrary dl = DateLibrary.getInstance();
-		dl.setTo( new Date() );
- 
+
 		logger.debug("start task " + activation.getType() + " " + activation.getActivitySerial() + " ("+ pipelineId + "-" + order + "):");
 		logger.debug( applicationName );
         
@@ -226,8 +226,6 @@ public class TaskManager implements ITaskManager {
         if ( recordTaskSerial.length() > 30000 ) {
         	flushRecordMemory();
         }
-        
-        System.out.println("tasks running " + runningTaskCount );
         
         if ( activation.getActivitySerial().equals( recordTaskSerial ) ) {
         	recordedTasks.add( task );

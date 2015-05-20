@@ -4,7 +4,7 @@ import java.util.List;
 
 import cmabreu.sagitarii.teapot.Activation;
 
-public interface ITask extends Runnable{
+public interface ITask extends Runnable {
 	String getTaskId();
 	String getApplicationName();
 	TaskStatus getTaskStatus();

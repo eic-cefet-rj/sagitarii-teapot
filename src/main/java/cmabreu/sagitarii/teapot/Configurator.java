@@ -81,8 +81,8 @@ public class Configurator {
 	}
 
 	public int getPoolIntervalMilliSeconds() {
-		if ( poolIntervalMilliSeconds < 250 ) {
-			poolIntervalMilliSeconds = 250;
+		if ( poolIntervalMilliSeconds < 200 ) {
+			poolIntervalMilliSeconds = 200;
 		}
 		return poolIntervalMilliSeconds;
 	}

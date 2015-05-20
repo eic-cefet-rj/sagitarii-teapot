@@ -77,6 +77,7 @@ public class ExternalTask implements ITask {
             return;
         }
         status = TaskStatus.FINISHED;
+        
         monitor.notify( this );
     }
 

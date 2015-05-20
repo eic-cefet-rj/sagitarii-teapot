@@ -67,11 +67,12 @@ public class Communicator  {
 	* @param  cpuLoad  a carga de CPU atual da máquina (em %)
 	* @return uma string contendo a resposta do servidor.
 	*/
-	public String anuncia( Double cpuLoad ) {
+	public synchronized String anuncia( Double cpuLoad ) {
 		String parameters = "soName=" + soName + "&localIpAddress=" + localIpAddress + 
 				"&machineName=" + machineName + "&macAddress=" + macAddress + "&cpuLoad=" + cpuLoad +
 				"&availableProcessors=" + availableProcessors + "&soFamily=" + soFamily +
 				"&javaVersion=" + java + "&maxAllowedTasks=" + maxAllowedTasks;
+		
 		return send( "announce", parameters);
 	}
 	
