@@ -10,8 +10,7 @@ import cmabreu.sagitarii.teapot.Activation;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
 
-public class ExternalTask implements ITask {
-	private ITaskManager monitor;
+public class Task {
 	private List<String> sourceData;
 	private String applicationName;
 	private TaskStatus status;
@@ -19,42 +18,39 @@ public class ExternalTask implements ITask {
 	private Activation activation;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 	
-	
-	@Override
 	public List<String> getSourceData() {
 		return sourceData;
 	}
 
-	@Override
 	public void setSourceData(List<String> sourceData) {
 		this.sourceData = sourceData;
 	}
 
-	@Override
 	public TaskStatus getTaskStatus() {
 		return this.status;
 	}
 	
-	@Override
 	public String getApplicationName() {
 		return this.applicationName;
 	}
 	
-	@Override
 	public String getTaskId() {
 		return this.activation.getTaskId();
 	}	
 	
-	
-	public ExternalTask( ITaskManager monitor, Activation activation, String applicationName ) {
+	public Task( Activation activation, String applicationName ) {
 		this.applicationName = applicationName;
-		this.monitor = monitor;
         this.activation = activation;
         status = TaskStatus.STOPPED;
         this.activation = activation;
 	}
-	
-	@Override
+
+	/**
+	 * BLOCKING
+	 * Will execute a external program (wrapper)
+	 * WIll block until task is finished
+	 * 
+	 */
 	public void run() {
 		Process process = null;
         status = TaskStatus.RUNNING;
@@ -77,19 +73,14 @@ public class ExternalTask implements ITask {
             return;
         }
         status = TaskStatus.FINISHED;
-        
-        monitor.notify( this );
     }
 
-	@Override
 	public int getExitCode() {
 		return this.exitCode;
 	}
 
-	@Override
 	public Activation getActivation() {
 		return this.activation;
 	}
-
 
 }

@@ -17,9 +17,8 @@ import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.comm.Downloader;
 import cmabreu.sagitarii.teapot.comm.FileUnity;
 import cmabreu.sagitarii.teapot.comm.Uploader;
-import cmabreu.taskmanager.core.ITask;
-import cmabreu.taskmanager.core.ITaskObserver;
-import cmabreu.taskmanager.core.TaskManager;
+import cmabreu.taskmanager.core.SystemProperties;
+import cmabreu.taskmanager.core.Task;
 
 /**
  * Copyright 2015 Carlos Magno Abreu
@@ -42,54 +41,44 @@ import cmabreu.taskmanager.core.TaskManager;
  * 
  */
 
-public class Teapot implements ITaskObserver {
-	private TaskManager tm;
+public class Teapot {
+	private SystemProperties tm;
 	private Communicator comm;
 	private Configurator gf;
 	private XMLParser parser;
 	private List<Activation> executionQueue;
-	private boolean restarting = false;
-	private boolean reloading = false;
-	private boolean quiting = false;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
+	private List<Task> tasks = new ArrayList<Task>();
+	private Task currentTask = null;
+	
+	public Task getCurrentTask() {
+		return currentTask;
+	}
 	
 	public List<Activation> getExecutionQueue() {
 		return new ArrayList<Activation>( executionQueue );
 	}
 	
-	public Teapot(TaskManager tm, Communicator comm, Configurator gf) {
-		tm.setObserver(this);
+	public List<Task> getTasks() {
+		return new ArrayList<Task>( tasks );
+	}
+	
+	public Teapot(SystemProperties tm, Communicator comm, Configurator gf) {
 		this.tm = tm;
 		this.comm = comm;
 		this.gf = gf;
 		this.parser = new XMLParser();
 		this.executionQueue = new ArrayList<Activation>();
-		logger.debug("cleaning workspace...");
-		cleanUp();
-		logger.debug("done.");
 	}
 	
 
-	private void sanitize( ITask task ) {
-		
+	private void sanitize( Task task ) {
 		if ( ( task.getExitCode() == 0 ) && gf.getClearDataAfterFinish() ) {
 			try {
 				FileUtils.deleteDirectory( new File( task.getActivation().getNamespace() ) ); 
 			} catch ( IOException e ) {
 				sendErrorLog( e.getMessage() );
 			}
-		}
-	}
-
-	/**
-	 * Remover o diretório raiz do namespace
-	 * Chamado antes de iniciar os trabalhos para sempre ter um namespace limpo.
-	 */
-	private void cleanUp() {
-		try {
-			FileUtils.deleteDirectory( new File( "namespaces" ) ); 
-		} catch ( IOException e ) {
-			sendErrorLog( e.getMessage() );
 		}
 	}
 
@@ -149,36 +138,6 @@ public class Teapot implements ITaskObserver {
 	}
 	
 	/**
-	* Implementacao de ITaskObserver.notify()
-	* Recebe uma noficacao quando uma tarefa é concluída.
-	* Este método é propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
-	* que dispara ITaskObserver.notify() caso tenha sido chamado ITaskObserver.setObserver com um 
-	* observer válido (neste caso, o observer é esta classe).
-	*/
-	@Override
-	public synchronized void notify( ITask task ) {
-		logger.debug("task " + task.getTaskId() + "("+ task.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
-		try {
-			Activation act = task.getActivation();
-			// Check output file
-			validateProduct( act.getNamespace() );
-			// Send data and files
-
-			new Uploader(gf).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
-					act.getNamespace() , task, tm );
-			
-			// Run next task in same instance (if exists)
-			executeNext( task );
-			// Clean up
-			sanitize( task );
-			
-		} catch ( Exception e ) {
-			sendErrorLog("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
-		}
-		
-	}
-
-	/**
 	 * Formata o comando da ativacao seguinte usando o resultado CSV da ativacao anterior
 	 * 
 	 * @return o comando da ativacao após a substituicao das tags
@@ -196,14 +155,14 @@ public class Teapot implements ITaskObserver {
 	
 	
 	/**
-	 * Procura a proxima ativacao da fila de pipelines recebidos que tenha numero de ordem 
+	 * Procura a proxima ativacao da fila de instancias recebidos que tenha numero de ordem 
 	 * imediatamente superior à informada e que esteja na mesma instância.
 	 * Caso não encontre, a instância foi toda executada. Não faz nada.
 	 * 
 	 * @param task Última tarefa executada
 	 */
-	private synchronized void executeNext( ITask task ) {
-		logger.debug("searching for pipelined tasks for task " + task.getActivation().getExecutor() + " (index " + task.getActivation().getOrder() + ") fragment " + task.getActivation().getFragment() 
+	private void executeNext( Task task ) {
+		logger.debug("searching for instance tasks for task " + task.getActivation().getExecutor() + " (index " + task.getActivation().getOrder() + ") fragment " + task.getActivation().getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());
 		Activation previousActivation = task.getActivation();
 		int nextOrder = previousActivation.getOrder() + 1;
@@ -234,18 +193,70 @@ public class Teapot implements ITaskObserver {
 		}
 	}
 	
+	
 	/**
-	 * Executa uma tarefa e avisa ao Sagitarii.
-	 * @param activation
+	 * Run a wrapper task
+	 * BLOCKING
+	 * 
+	 * @param activation an activation
 	 */
 	private void runTask( Activation activation ) {
-		tm.startTask( activation, activation.getCommand() );
+		String applicationName = activation.getCommand();
+		String pipelineId = activation.getPipelineSerial();
+		int order = activation.getOrder();
+
+		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ pipelineId + "-" + order + "):");
+		logger.debug( applicationName );
+        
+		Task task = new Task( activation, applicationName );
+		task.setSourceData( activation.getSourceData() );
+		
 		try {
 			comm.send("activityManagerReceiver", "pipelineId=" + activation.getPipelineSerial() + "&response=RUNNING&node=" + tm.getMacAddress() + "&executor" + activation.getExecutor() );
+	        tasks.add(task);
+	        currentTask = task;
+	        
+	        // Block
+	        task.run();
+	        
+	        // When finished...
+	        notify( task );
+	        
 		} catch ( Exception e ) {
 			sendErrorLog("Sagitarii not received task RUNNING response. Maybe offline.");
 		}
 	}
+	
+	/**
+	* Implementacao de ITaskObserver.notify()
+	* Recebe uma noficacao quando uma tarefa é concluída.
+	* Este método é propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
+	* que dispara ITaskObserver.notify() caso tenha sido chamado ITaskObserver.setObserver com um 
+	* observer válido (neste caso, o observer é esta classe).
+	*/
+	public synchronized void notify( Task task ) {
+		logger.debug("task " + task.getTaskId() + "("+ task.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
+		try {
+			Activation act = task.getActivation();
+			
+			// Check output file
+			validateProduct( act.getNamespace() );
+
+			// Send data and files
+			new Uploader(gf).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
+					act.getNamespace() , task, tm );
+			
+			// Run next task in same instance (if exists)
+			executeNext( task );
+			// Clean up
+			sanitize( task );
+			
+		} catch ( Exception e ) {
+			sendErrorLog("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
+		}
+		
+	}
+	
 
 	/**
 	 * Cria a pasta para os dados de trabalho da tarefa e caixas de
@@ -368,153 +379,38 @@ public class Teapot implements ITaskObserver {
 		writer.close();		
 	}
 	
-	/**
-	 * Will restart Teapot
-	 * It is a Sagitarii command
-	 */
-	public void restartApplication() {
-		try {
-		  final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-		  final File currentJar = new File ( Teapot.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-	
-		  /* is it a jar file? */
-		  if( !currentJar.getName().endsWith(".jar") ) {
-		    return;
-		  }
-	
-		  /* Build command: java -jar application.jar */
-		  final ArrayList<String> command = new ArrayList<String>();
-		  command.add( javaBin );
-		  command.add( "-jar" );
-		  command.add( currentJar.getPath() );
-	
-		  final ProcessBuilder builder = new ProcessBuilder(command);
-		  builder.start();
-		  System.exit(0);
-		} catch ( Exception e ) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void restart() {
-		restarting = true;
-		if ( tm.getRunningTaskCount() > 0 ) {
-			logger.debug("cannot restart now. " + tm.getRunningTaskCount() + " tasks still runnig");
-		} else {
-			logger.debug("restart now.");
-			restartApplication();
-		}
-	}
-	
-	/**
-	 * Baixa novamente os wrappers
-	 */
-	private void reloadWrappers() {
-		reloading = true;
-		if ( tm.getRunningTaskCount() > 0 ) {
-			logger.debug("cannot reload wrappers now. " + tm.getRunningTaskCount() + " tasks still runnig");
-		} else {
-			logger.debug("reload all wrappers now.");
-			try {
-				RepositoryManager rm = new RepositoryManager();
-				rm.downloadWrappers( gf.getHostURL(), tm.getOsType() );
-				logger.debug("all wrappers reloaded.");
-			} catch ( Exception e ) {
-				sendErrorLog("cannot reload wrappers: " + e.getMessage() );
-			}
-			reloading = false;
-		}
-	}
-	
-
-	private void quit() {
-		quiting = true;
-		if ( tm.getRunningTaskCount() > 0 ) {
-			logger.debug("cannot quit now. " + tm.getRunningTaskCount() + " tasks still runnig");
-		} else {
-			logger.debug("quit now.");
-			 System.exit(0);
-		}
-	}
 	
 	/**
 	 * É chamado de tempos em tempos para enviar os dados da máquina ao Sagitarii.
 	 * Ao fazer isso, o Sagitarii poderá enviar uma nova tarefa.
 	 */
-	public synchronized void process( String resposta ) throws Exception {
-		
-		if ( quiting ) {
-			// If we're here, is becaus the first call not finished (have tasks still running),
-			// so we'll try again
-			quit();
-			return;
-		}
-		if ( restarting ) {
-			// If we're here, is becaus the first call not finished (have tasks still running), 
-			// so we'll try again
-			restart();
-			return;
-		}
-		if ( reloading ) {
-			// If we're here, is becaus the first call not finished (have tasks still running), 
-			// so we'll try again
-			reloadWrappers();
-			return;
-		}
-		
-		if ( ( !resposta.equals( "NO_ANSWER" ) ) && ( !resposta.equals( "COMM_ERROR" ) ) && ( !resposta.equals( "" ) ) ) {
-			if ( resposta.equals( "COMM_RESTART" ) ) {
-				logger.debug("get restart command from Sagitarii");
-				restart();
-			} else
-			if ( resposta.equals( "RELOAD_WRAPPERS" ) ) {
-				logger.debug("get reload wrappers command from Sagitarii");
-				reloadWrappers();
-			} else
-			if ( resposta.equals( "COMM_QUIT" ) ) {
-				logger.debug("get quit command from Sagitarii");
-				quit();
-			} else
-			if ( resposta.equals( "COMM_CLEAN_WORKSPACE" ) ) {
-				logger.debug("get clean workspace command from Sagitarii");
-				if ( tm.getRunningTaskCount() > 0 ) {
-					logger.debug("will not clean workspace. " + tm.getRunningTaskCount() + " tasks still runnig");
-				} else {
-					cleanUp();
-					logger.debug("workspace cleaned");
-				}
-			} else {
-				// Pipeline XML received from Sagitarii. Its time to work!
-				
-				String pipelineSerial = "";
-				try {
-					
-					List<Activation> acts = parser.parseActivations( resposta );
-					executionQueue.addAll( acts );
+	public void process( String response ) throws Exception {
+		logger.debug("process");
+		String pipelineSerial = "";
+		try {
+			
+			List<Activation> acts = parser.parseActivations( response );
+			executionQueue.addAll( acts );
 
-					for ( Activation act : acts ) {
-						if( act.getOrder() == 0 ) {
-							
-							logger.debug("execute first activation in pipeline " + act.getPipelineSerial() );
-							pipelineSerial = act.getPipelineSerial();
-							executionQueue.remove(act);
-							String newCommand = generateCommand( act );
-							act.setCommand( newCommand );
-							saveInputData( act );
-							saveXmlData( act );
-							runTask( act );
-							break;
-						}
-					}
+			for ( Activation act : acts ) {
+				if( act.getOrder() == 0 ) {
 					
-				} catch (Exception e) {
-					comm.send("activityManagerReceiver", "pipelineId=" + pipelineSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
-					sendErrorLog( e.getMessage() );
+					logger.debug("execute first task in instance " + act.getPipelineSerial() );
+					pipelineSerial = act.getPipelineSerial();
+					executionQueue.remove(act);
+					String newCommand = generateCommand( act );
+					act.setCommand( newCommand );
+					saveInputData( act );
+					saveXmlData( act );
+					runTask( act );
+					break;
 				}
 			}
 			
+		} catch (Exception e) {
+			comm.send("activityManagerReceiver", "pipelineId=" + pipelineSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
+			sendErrorLog( e.getMessage() );
 		}
-		
 	}
 
 	

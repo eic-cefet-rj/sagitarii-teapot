@@ -23,19 +23,9 @@ public class CoreSystem implements CommandLine.ICommand {
 					Main.getTaskManager().getMacAddress() + " " + 
 					Main.getTaskManager().getLocalIpAddress() );
 		}
+		
 		if ( v.get(1).equals("occupation") ) {
-			System.out.println( "Tasks: " + Main.getTaskManager().getRunningTaskCount() + " CPU at " + Main.getTaskManager().getCpuLoad() + "%" ); 
-		}
-
-		if ( v.get(1).equals("record") ) {
-			if ( v.size() > 2 ) {
-				Main.getTaskManager().startRecord( v.get(2) );
-				System.out.println("Starting record " + v.get(2) );
-			}
-		}
-
-		if ( v.get(1).equals("stoprecord") ) {
-			Main.getTaskManager().stopRecord();
+			System.out.println( "Tasks: " + Main.getRunners().size() + " CPU at " + Main.getTaskManager().getCpuLoad() + "%" ); 
 		}
 
 		if ( v.get(1).equals("setspeed") ) {
@@ -46,17 +36,6 @@ public class CoreSystem implements CommandLine.ICommand {
 			}
 		}
 
-		
-		if ( v.get(1).equals("notify") ) {
-			if ( v.size() > 2 ) {
-				String toSend = "";
-				for ( int x = 2; x < v.size(); x++ ) {
-					toSend = toSend + v.get(x) + " ";
-				}
-				Main.getTeapot().sendErrorLog( v.get(2) );
-			}
-		}
-		
 		return true;
 	}
 	

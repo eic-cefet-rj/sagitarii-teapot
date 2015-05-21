@@ -29,6 +29,7 @@ public class Configurator {
 	private int fileSenderDelay;
 	private String storageHost;
 	private int storagePort;
+	private boolean useSpeedEqualizer;
 	
 	private Logger logger = LogManager.getLogger( this.getClass().getName()  );
 
@@ -58,6 +59,10 @@ public class Configurator {
 	
 	public void setClearDataAfterFinish(boolean clearDataAfterFinish) {
 		this.clearDataAfterFinish = clearDataAfterFinish;
+	}
+	
+	public boolean useSpeedEqualizer() {
+		return useSpeedEqualizer;
 	}
 	
 	public String getrPath() {
@@ -173,6 +178,7 @@ public class Configurator {
 				fileSenderDelay = Integer.valueOf( getTagValue("fileSenderDelay", mpElement) );
 				showConsole = Boolean.parseBoolean( getTagValue("activationShowConsole", mpElement) );
 				clearDataAfterFinish = Boolean.parseBoolean( getTagValue("clearDataAfterFinish", mpElement) );
+				useSpeedEqualizer = Boolean.parseBoolean( getTagValue("useSpeedEqualizer", mpElement) );
 				
 				useProxy = Integer.parseInt( getValue("proxy", "useProxy") );
 				

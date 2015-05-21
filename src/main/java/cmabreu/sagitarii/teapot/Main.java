@@ -1,44 +1,58 @@
 package cmabreu.sagitarii.teapot;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
 import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.comm.Downloader;
 import cmabreu.sagitarii.teapot.comm.Uploader;
 import cmabreu.sagitarii.teapot.console.CommandLoader;
-import cmabreu.taskmanager.core.TaskManager;
+import cmabreu.taskmanager.core.SystemProperties;
 
 
 public class Main {
 	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.Main" ); 
 	private static CommandLoader cm;
-	private static TaskManager tm;
-	private static Teapot teapot;
-	private static Configurator gf;
+	private static SystemProperties systemProperties;
+	private static Configurator configurator;
 	private static boolean paused = false;
-	private static List<TaskRequester> requesters = new ArrayList<TaskRequester>();
+	private static List<TaskRunner> runners = new ArrayList<TaskRunner>();
+	private static boolean restarting = false;
+	private static boolean reloading = false;
+	private static boolean quiting = false;
 	
 	public static void pause() {
 		paused = true;
 	}
 	
 	public static Configurator getConfigurator() {
-		return gf;
+		return configurator;
 	}
 
 	public static void resume() {
 		paused = false;
 	}
 
-	public static Teapot getTeapot() {
-		return teapot;
+	public static SystemProperties getTaskManager() {
+		return systemProperties;
 	}
-	
-	public static TaskManager getTaskManager() {
-		return tm;
+
+	/**
+	 * Remover o diretório raiz do namespace
+	 * Chamado antes de iniciar os trabalhos para sempre ter um namespace limpo.
+	 */
+	private static void cleanUp() {
+		try {
+			FileUtils.deleteDirectory( new File( "namespaces" ) ); 
+		} catch ( IOException e ) {
+			logger.error( e.getMessage() );
+		}
 	}
 
 	public static void main( String[] args ) {
@@ -52,43 +66,45 @@ public class Main {
 
 			logger.debug("Loading Repository Manager ...");
 			
-			gf = new Configurator("config.xml");
-			gf.loadMainConfig();
+			configurator = new Configurator("config.xml");
+			configurator.loadMainConfig();
 			RepositoryManager rm = new RepositoryManager();
 
 			logger.debug("Loading Task Manager ...");
-			tm = new TaskManager();
+			systemProperties = new SystemProperties();
 
-			logger.debug("Available processors: " + tm.getAvailableProcessors() + " cores." );
-			logger.debug("SO name / machine: " + tm.getSoName() + " / " + tm.getMachineName() );
-			logger.debug("SO family: " + tm.getOsType() );
-			logger.debug("IP/MAC: " +  tm.getLocalIpAddress() + " / " + tm.getMacAddress() );
-			logger.debug("Java version " + tm.getJavaVersion() );
+			logger.debug("Available processors: " + systemProperties.getAvailableProcessors() + " cores." );
+			logger.debug("SO name / machine: " + systemProperties.getSoName() + " / " + systemProperties.getMachineName() );
+			logger.debug("SO family: " + systemProperties.getOsType() );
+			logger.debug("IP/MAC: " +  systemProperties.getLocalIpAddress() + " / " + systemProperties.getMacAddress() );
+			logger.debug("Java version " + systemProperties.getJavaVersion() );
 			
-			logger.debug("Announce interval: " + gf.getPoolIntervalMilliSeconds() +"ms." );
-			logger.debug("Sagitarii URL: " + gf.getHostURL() );
+			logger.debug("Announce interval: " + configurator.getPoolIntervalMilliSeconds() +"ms." );
+			logger.debug("Sagitarii URL: " + configurator.getHostURL() );
 
-			logger.debug("R Processor location: " + gf.getrPath());
+			logger.debug("R Processor location: " + configurator.getrPath());
 
+			logger.debug("cleaning workspace...");
+			cleanUp();
 			
-			if ( gf.useProxy() ) {
-				logger.debug("Proxy: " + gf.getProxyInfo().getHost() );
+			if ( configurator.useProxy() ) {
+				logger.debug("Proxy: " + configurator.getProxyInfo().getHost() );
 			}
-			if ( !gf.getShowConsole() ) {
+			if ( !configurator.getShowConsole() ) {
 				logger.debug("No activations console.");
 			}
 			
 			logger.debug("Searching for wrappers...");
 			try {
-				rm.downloadWrappers( gf.getHostURL(), tm.getOsType() );
+				rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
 				wrappersDownloaded = true;
 			} catch ( ConnectException e ) {
 				logger.error("Cannot download wrappers. Will interrupt startup until Sagitarii is up.");
 			}
 
 			logger.debug("Staring communicator...");
-			Communicator comm = new Communicator( gf, tm );
-			teapot = new Teapot(tm, comm, gf);
+			Communicator communicator = new Communicator( configurator, systemProperties );
+			
 			
 			if ( wrappersDownloaded ) {
 				logger.debug("Teapot started.");
@@ -115,7 +131,7 @@ public class Main {
 					String experimentSerial = args[3];
 					String folderName = args[4];
 
-					new Uploader(gf).uploadCSV(fileName, relationName, experimentSerial, folderName, null, tm );
+					new Uploader(configurator).uploadCSV(fileName, relationName, experimentSerial, folderName, null, systemProperties );
 					
 					System.exit(0);
 				}
@@ -128,7 +144,7 @@ public class Main {
 				if ( args[0].equalsIgnoreCase("download") ) {
 					String fileId = args[1];
 					String saveTo = args[2];
-					String url = gf.getHostURL() + "/getFile?idFile=" + fileId;
+					String url = configurator.getHostURL() + "/getFile?idFile=" + fileId;
 					new Downloader().download(url, saveTo, true);
 					System.exit(0);
 				}
@@ -138,13 +154,22 @@ public class Main {
 			// =============================================================
 			
 			while (true) {
-				logger.debug( requesters.size() + " of " + gf.getActivationsMaxLimit() + " tasks running" );
-				SpeedEqualizer.equalize( gf, requesters.size() );
+				clearRunners();
+				logger.debug( "init new cycle: " + runners.size() + " of " + configurator.getActivationsMaxLimit() + " tasks running:" );
+				
+				for ( TaskRunner tr : runners ) {
+					if ( tr.getCurrentTask() != null ) {
+						String time = tr.getStartTime() + " (" + tr.getTime() + "s)";
+						logger.debug( " > " + tr.getCurrentTask().getTaskId() + " (" + tr.getCurrentTask().getActivation().getExecutor() + ") : " + time);
+					}
+				}
+				
+				SpeedEqualizer.equalize( configurator, runners.size() );
 				
 				if ( !wrappersDownloaded ) {
 					try {
 						logger.debug("Searching for wrappers...");
-						rm.downloadWrappers( gf.getHostURL(), tm.getOsType() );
+						rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
 						wrappersDownloaded = true;
 						logger.debug("Done. Teapot Started.");
 					} catch ( ConnectException e ) {
@@ -153,18 +178,23 @@ public class Main {
 				} else {
 					if ( !paused ) {
 						
-						if ( requesters.size() < gf.getActivationsMaxLimit() ) {
-							logger.debug("thread slot available. requesting data from Sagitarii");
-							TaskRequester tr = new TaskRequester(comm, tm, teapot);
-							requesters.add(tr);
-							tr.start();
+						if ( runners.size() < configurator.getActivationsMaxLimit() ) {
+							logger.debug( "asking Sagitarii for tasks to process...");
+							String response = communicator.anuncia( systemProperties.getCpuLoad() );
+							logger.debug("Sagitarii answered " + response.length() + " bytes");
+							
+							if ( preProcess( response ) ) {
+								TaskRunner tr = new TaskRunner(response, communicator, systemProperties, configurator);
+								runners.add(tr);
+								tr.start();
+							}
+							
 						}
-						clearRequesters();
 					}
 				}
 				
 				try {
-				    Thread.sleep( gf.getPoolIntervalMilliSeconds() );
+				    Thread.sleep( configurator.getPoolIntervalMilliSeconds() );
 				} catch( InterruptedException ex ) {
 				
 				}
@@ -180,18 +210,141 @@ public class Main {
 
 	}
 	
-	private static void clearRequesters() {
-		logger.debug("cleaning requesters...");
+	private static boolean preProcess( String response ) {
+		logger.debug("checking preprocess");
+		if ( quiting ) {
+			// If we're here, is becaus the first call not finished (have tasks still running),
+			// so we'll try again
+			quit();
+			return false;
+		}
+		if ( restarting ) {
+			// If we're here, is becaus the first call not finished (have tasks still running), 
+			// so we'll try again
+			restart();
+			return false;
+		}
+		if ( reloading ) {
+			// If we're here, is becaus the first call not finished (have tasks still running), 
+			// so we'll try again
+			reloadWrappers();
+			return false;
+		}
+		
+		if ( ( !response.equals( "NO_ANSWER" ) ) && ( !response.equals( "COMM_ERROR" ) ) && ( !response.equals( "" ) ) ) {
+			if ( response.equals( "COMM_RESTART" ) ) {
+				logger.debug("get restart command from Sagitarii");
+				restart();
+			} else
+			if ( response.equals( "RELOAD_WRAPPERS" ) ) {
+				logger.debug("get reload wrappers command from Sagitarii");
+				reloadWrappers();
+			} else
+			if ( response.equals( "COMM_QUIT" ) ) {
+				logger.debug("get quit command from Sagitarii");
+				quit();
+			} else
+			if ( response.equals( "COMM_CLEAN_WORKSPACE" ) ) {
+				logger.debug("get clean workspace command from Sagitarii");
+				if (  getRunners().size() > 0 ) {
+					logger.debug("will not clean workspace. " + getRunners().size() + " tasks still runnig");
+				} else {
+					cleanUp();
+					logger.debug("workspace cleaned");
+				}
+			} 
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Will restart Teapot
+	 * It is a Sagitarii command
+	 */
+	public static void restartApplication() {
+		try {
+		  final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		  final File currentJar = new File ( Teapot.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+	
+		  /* is it a jar file? */
+		  if( !currentJar.getName().endsWith(".jar") ) {
+		    return;
+		  }
+	
+		  /* Build command: java -jar application.jar */
+		  final ArrayList<String> command = new ArrayList<String>();
+		  command.add( javaBin );
+		  command.add( "-jar" );
+		  command.add( currentJar.getPath() );
+	
+		  final ProcessBuilder builder = new ProcessBuilder(command);
+		  builder.start();
+		  System.exit(0);
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	private static void restart() {
+		restarting = true;
+		if ( getRunners().size() > 0 ) {
+			logger.debug("cannot restart now. " + getRunners().size() + " tasks still runnig");
+		} else {
+			logger.debug("restart now.");
+			restartApplication();
+		}
+	}
+	
+	private static void quit() {
+		quiting = true;
+		if ( getRunners().size() > 0 ) {
+			logger.debug("cannot quit now. " + getRunners().size() + " tasks still runnig");
+		} else {
+			logger.debug("quit now.");
+			 System.exit(0);
+		}
+	}
+	
+	/**
+	 * Baixa novamente os wrappers
+	 */
+	private static void reloadWrappers() {
+		reloading = true;
+		if ( getRunners().size() > 0 ) {
+			logger.debug("cannot reload wrappers now. " + getRunners().size() + " tasks still runnig");
+		} else {
+			logger.debug("reload all wrappers now.");
+			try {
+				RepositoryManager rm = new RepositoryManager();
+				rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
+				logger.debug("all wrappers reloaded.");
+			} catch ( Exception e ) {
+				logger.error("cannot reload wrappers: " + e.getMessage() );
+			}
+			reloading = false;
+		}
+	}
+
+	
+	public static List<TaskRunner> getRunners() {
+		return new ArrayList<TaskRunner>( runners );
+	}
+	
+	private static void clearRunners() {
+		logger.debug("cleaning task runners...");
 		int total = 0;
-		Iterator<TaskRequester> i = requesters.iterator();
+		Iterator<TaskRunner> i = runners.iterator();
 		while ( i.hasNext() ) {
-			TaskRequester req = i.next(); 
+			TaskRunner req = i.next(); 
 			if ( !req.isActive() ) {
+				logger.debug(" > killing task runner " + req.getSerial() );
 				i.remove();
 				total++;
 			}
 		}		
-		logger.debug( total + " requesters deleted" );
+		logger.debug( total + " task runners deleted" );
 	}
 
 }

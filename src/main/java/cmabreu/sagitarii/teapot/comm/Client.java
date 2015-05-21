@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
 
+import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
  
@@ -27,12 +28,12 @@ public class Client {
 	private Logger logger = LogManager.getLogger( this.getClass().getName() );
 
 	
-	public Client( String storageAddress, int storagePort, String sagitariiUrlPort, int fileSenderDelay) {
+	public Client( Configurator configurator ) {
 		filesToSend = new ArrayList<String>();
-		this.storageAddress = storageAddress;
-		this.storagePort = storagePort;
-		this.sagiHost = sagitariiUrlPort;
-		this.fileSenderDelay = fileSenderDelay;
+		this.storageAddress = configurator.getStorageHost();
+		this.storagePort = configurator.getStoragePort();
+		this.sagiHost = configurator.getHostURL();
+		this.fileSenderDelay = configurator.getFileSenderDelay();
 	}
 	
 	
@@ -148,9 +149,10 @@ public class Client {
         oos.close();
         fis.close();
 
-        file.delete();
+        long size = file.length();
         logger.debug("done sending " + file.getName() );
-        return file.length();
+        file.delete();
+        return size;
 	}
 
 	private void commit() throws Exception {

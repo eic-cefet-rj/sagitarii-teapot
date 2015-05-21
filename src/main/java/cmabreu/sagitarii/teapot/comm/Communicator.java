@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
-import cmabreu.taskmanager.core.TaskManager;
+import cmabreu.taskmanager.core.SystemProperties;
 
 public class Communicator  {
 	private WebClient webClient;
@@ -21,7 +21,7 @@ public class Communicator  {
 	private Logger logger = LogManager.getLogger( this.getClass().getName() );
 
 	
-	public Communicator( Configurator gf, TaskManager tm ) throws Exception {
+	public Communicator( Configurator gf, SystemProperties tm ) throws Exception {
 		
 		webClient = new WebClient(gf);
 		try {
