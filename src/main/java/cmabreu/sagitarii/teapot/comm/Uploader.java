@@ -5,8 +5,8 @@ import java.io.IOException;
 import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
-import cmabreu.taskmanager.core.SystemProperties;
-import cmabreu.taskmanager.core.Task;
+import cmabreu.sagitarii.teapot.SystemProperties;
+import cmabreu.sagitarii.teapot.Task;
 
 public class Uploader {
 	private Configurator gf; 

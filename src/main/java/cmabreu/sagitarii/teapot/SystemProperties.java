@@ -1,4 +1,4 @@
-package cmabreu.taskmanager.core;
+package cmabreu.sagitarii.teapot;
 
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
@@ -16,9 +16,6 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
-import cmabreu.sagitarii.teapot.LogManager;
-import cmabreu.sagitarii.teapot.Logger;
 
 
 public class SystemProperties  {

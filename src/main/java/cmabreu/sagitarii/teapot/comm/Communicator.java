@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
-import cmabreu.taskmanager.core.SystemProperties;
+import cmabreu.sagitarii.teapot.SystemProperties;
 
 public class Communicator  {
 	private WebClient webClient;

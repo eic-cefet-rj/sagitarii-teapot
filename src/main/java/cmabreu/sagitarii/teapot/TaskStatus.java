@@ -1,4 +1,4 @@
-package cmabreu.taskmanager.core;
+package cmabreu.sagitarii.teapot;
 
 public enum TaskStatus {
 	ERROR,

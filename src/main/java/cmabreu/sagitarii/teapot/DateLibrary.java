@@ -1,4 +1,4 @@
-package cmabreu.taskmanager.core;
+package cmabreu.sagitarii.teapot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

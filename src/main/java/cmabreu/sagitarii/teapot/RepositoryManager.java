@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cmabreu.sagitarii.teapot.comm.Downloader;
-import cmabreu.taskmanager.core.OsType;
 
 public class RepositoryManager {
 	private String FOLDER_NAME;

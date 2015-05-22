@@ -17,8 +17,6 @@ import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.comm.Downloader;
 import cmabreu.sagitarii.teapot.comm.FileUnity;
 import cmabreu.sagitarii.teapot.comm.Uploader;
-import cmabreu.taskmanager.core.SystemProperties;
-import cmabreu.taskmanager.core.Task;
 
 /**
  * Copyright 2015 Carlos Magno Abreu

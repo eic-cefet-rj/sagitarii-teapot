@@ -1,14 +1,10 @@
-package cmabreu.taskmanager.core;
+package cmabreu.sagitarii.teapot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-
-import cmabreu.sagitarii.teapot.Activation;
-import cmabreu.sagitarii.teapot.LogManager;
-import cmabreu.sagitarii.teapot.Logger;
 
 public class Task {
 	private List<String> sourceData;

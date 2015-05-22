@@ -13,7 +13,6 @@ import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.comm.Downloader;
 import cmabreu.sagitarii.teapot.comm.Uploader;
 import cmabreu.sagitarii.teapot.console.CommandLoader;
-import cmabreu.taskmanager.core.SystemProperties;
 
 
 public class Main {
@@ -51,7 +50,7 @@ public class Main {
 		try {
 			FileUtils.deleteDirectory( new File( "namespaces" ) ); 
 		} catch ( IOException e ) {
-			logger.error( e.getMessage() );
+			logger.error( e.getMessage() ); 
 		}
 	}
 

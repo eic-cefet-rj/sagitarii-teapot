@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import cmabreu.sagitarii.teapot.comm.Communicator;
-import cmabreu.taskmanager.core.DateLibrary;
-import cmabreu.taskmanager.core.SystemProperties;
-import cmabreu.taskmanager.core.Task;
 
 public class TaskRunner extends Thread {
 	private Teapot teapot;
