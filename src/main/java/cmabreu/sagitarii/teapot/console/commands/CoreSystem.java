@@ -10,12 +10,18 @@ public class CoreSystem implements CommandLine.ICommand {
 	@Override
 	public boolean doIt( List<String> v ) {
 
+		if ( v.size() == 1 ) {
+			System.out.println("usage: system <pause | resume | whoami | occupation>");
+			return true;
+		}
+
+		
 		if ( v.get(1).equals("pause") ) {
 			Main.pause();
 			System.out.println("System paused");
 		}
 		if ( v.get(1).equals("resume") ) {
-			Main.pause();
+			Main.resume();
 			System.out.println("System resumed");
 		}
 		if ( v.get(1).equals("whoami") ) {
@@ -26,14 +32,6 @@ public class CoreSystem implements CommandLine.ICommand {
 		
 		if ( v.get(1).equals("occupation") ) {
 			System.out.println( "Tasks: " + Main.getRunners().size() + " CPU at " + Main.getConfigurator().getSystemProperties().getCpuLoad() + "%" ); 
-		}
-
-		if ( v.get(1).equals("setspeed") ) {
-			if ( v.size() == 3 ) {
-				int old = Main.getConfigurator().getPoolIntervalMilliSeconds(); 
-				Main.getConfigurator().setPoolIntervalMilliSeconds( Integer.valueOf( v.get(2) ) );
-				System.out.println("Speed set to " + v.get(2) + "ms (was " + old + "ms)");
-			}
 		}
 
 		return true;

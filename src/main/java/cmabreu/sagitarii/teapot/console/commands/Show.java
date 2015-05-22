@@ -13,7 +13,7 @@ public class Show implements CommandLine.ICommand {
 	public boolean doIt( List<String> v ) {
 
 		if ( v.size() == 1 ) {
-			System.out.println("usage: show <tasks | total>");
+			System.out.println("usage: show <tasks | total | instances>");
 			return true;
 		}
 		
@@ -21,21 +21,43 @@ public class Show implements CommandLine.ICommand {
 			System.out.println("Total instances processed until now: " + Main.getTotalInstancesProcessed() );
 		}
 		
+		
+		if ( v.get(1).equals("instances") ) {
+			System.out.println("Found " + Main.getRunners().size() + " running tasks:");
+			for ( TaskRunner taskRequester : Main.getRunners() ) {
+				if ( taskRequester.getCurrentTask() != null ) {
+					String time = taskRequester.getStartTime() + " (" + (long)taskRequester.getTime() + "s)";
+					
+					String line = taskRequester.getCurrentTask().getActivation().getPipelineSerial() + " ";
+					
+					for ( Activation activation :  taskRequester.getJobPool() ) {
+						line = line + "[" + activation.getExecutor() + " | " + activation.getStatus().toString() + "] ";
+					}
+
+					line = line + time;
+					System.out.println( line );
+					
+				}
+			}
+		}
+		
+		
 		if ( v.get(1).equals("tasks") ) {
 			System.out.println("Found " + Main.getRunners().size() + " running tasks:");
 			for ( TaskRunner taskRequester : Main.getRunners() ) {
 				if ( taskRequester.getCurrentTask() != null ) {
 					String time = taskRequester.getStartTime() + " (" + (long)taskRequester.getTime() + "s)";
 					System.out.println( " > " +  
-							"/" + taskRequester.getCurrentTask().getActivation().getExperiment() + 
+							taskRequester.getCurrentTask().getActivation().getExperiment() + 
 							"/" + taskRequester.getCurrentTask().getActivation().getActivitySerial() + 
 							" " + taskRequester.getCurrentTask().getTaskId() + " (" + 
 							taskRequester.getCurrentTask().getActivation().getExecutor() + ") : " + time);
-					
+					/*
 					for ( Activation activation :  taskRequester.getJobPool() ) {
 						System.out.println("    > " + activation.getActivitySerial() + " " + activation.getTaskId() + " (" + 
-								activation.getExecutor() + ")" + activation.getStatus().toString() );
+								activation.getExecutor() + ") " + activation.getStatus().toString() );
 					}
+					*/
 					
 				}
 			}

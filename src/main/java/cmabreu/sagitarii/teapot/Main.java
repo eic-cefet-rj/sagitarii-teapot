@@ -364,7 +364,11 @@ public class Main {
 		while ( i.hasNext() ) {
 			TaskRunner req = i.next(); 
 			if ( !req.isActive() ) {
-				logger.debug(" > killing task runner " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
+				try {
+					logger.debug(" > killing task runner " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
+				} catch ( Exception e ) { 
+					logger.debug(" > killing null task runner");
+				}
 				i.remove();
 				total++;
 			}
