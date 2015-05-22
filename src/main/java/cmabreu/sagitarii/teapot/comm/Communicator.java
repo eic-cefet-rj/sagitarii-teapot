@@ -33,7 +33,6 @@ public class Communicator  {
 			this.java = URLEncoder.encode(tm.getJavaVersion(), "UTF-8");
 			this.soFamily = URLEncoder.encode(tm.getOsType().toString(), "UTF-8");
 			this.maxAllowedTasks = URLEncoder.encode( String.valueOf( gf.getActivationsMaxLimit() ) , "UTF-8");
-			
 		} catch (UnsupportedEncodingException e) {
 			throw e;
 		}
@@ -66,11 +65,12 @@ public class Communicator  {
 	* @param  cpuLoad (in %)
 	* @return Sagitarii response
 	*/
-	public synchronized String announceAndRequestTask( Double cpuLoad ) {
+	public synchronized String announceAndRequestTask( Double cpuLoad, Long freeMemory, Long totalMemory ) {
 		String parameters = "soName=" + soName + "&localIpAddress=" + localIpAddress + 
 				"&machineName=" + machineName + "&macAddress=" + macAddress + "&cpuLoad=" + cpuLoad +
 				"&availableProcessors=" + availableProcessors + "&soFamily=" + soFamily +
-				"&javaVersion=" + java + "&maxAllowedTasks=" + maxAllowedTasks;
+				"&javaVersion=" + java + "&maxAllowedTasks=" + maxAllowedTasks + "&freeMemory=" + freeMemory +
+				"&totalMemory=" + totalMemory;
 		
 		return send( "announce", parameters);
 	}

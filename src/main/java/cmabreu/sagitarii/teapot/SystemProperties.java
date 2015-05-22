@@ -26,6 +26,8 @@ public class SystemProperties  {
     private String macAddress;
     private OsType osType = OsType.UNIX_LIKE;
     private String javaVersion;
+    private long freeMemory;
+    private long totalMemory;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 
     public OsType getOsType() {
@@ -76,11 +78,22 @@ public class SystemProperties  {
     	return this.javaVersion;
     }
 
+    public long getTotalMemory() {
+    	totalMemory = Runtime.getRuntime().totalMemory();
+		return totalMemory;
+	}
+    
+    public long getFreeMemory() {
+    	freeMemory = Runtime.getRuntime().freeMemory();
+		return freeMemory;
+	}
     
     public SystemProperties() throws Exception {
     	getProcessCpuLoad();
     	logger.debug("processors...");
-    	this.availableProcessors = ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+    	this.availableProcessors = Runtime.getRuntime().availableProcessors(); //  ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+    	getFreeMemory(); 
+    	getTotalMemory();  
     	logger.debug("SO name...");
     	this.soName = ManagementFactory.getOperatingSystemMXBean().getName();
     	this.localIpAddress = "***";

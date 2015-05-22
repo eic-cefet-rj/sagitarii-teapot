@@ -45,6 +45,7 @@ public class Teapot {
 	private Configurator gf;
 	private XMLParser parser;
 	private List<Activation> executionQueue;
+	private List<Activation> jobPool;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 	private List<Task> tasks = new ArrayList<Task>();
 	private Task currentTask = null;
@@ -53,8 +54,8 @@ public class Teapot {
 		return currentTask;
 	}
 	
-	public List<Activation> getExecutionQueue() {
-		return new ArrayList<Activation>( executionQueue );
+	public List<Activation> getJobPool() {
+		return new ArrayList<Activation>( jobPool );
 	}
 	
 	public List<Task> getTasks() {
@@ -67,6 +68,7 @@ public class Teapot {
 		this.gf = gf;
 		this.parser = new XMLParser();
 		this.executionQueue = new ArrayList<Activation>();
+		this.jobPool = new ArrayList<Activation>();
 	}
 	
 
@@ -206,6 +208,8 @@ public class Teapot {
 		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ pipelineId + "-" + order + "):");
 		logger.debug( applicationName );
         
+		activation.setStatus( TaskStatus.RUNNING );
+		
 		Task task = new Task( activation, applicationName );
 		task.setSourceData( activation.getSourceData() );
 		
@@ -213,6 +217,7 @@ public class Teapot {
 			comm.send("activityManagerReceiver", "pipelineId=" + activation.getPipelineSerial() + "&response=RUNNING&node=" + tm.getMacAddress() + "&executor" + activation.getExecutor() );
 	        tasks.add(task);
 	        currentTask = task;
+	        
 	        
 	        // Block
 	        task.run();
@@ -236,6 +241,7 @@ public class Teapot {
 		logger.debug("task " + task.getTaskId() + "("+ task.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
 			Activation act = task.getActivation();
+			act.setStatus( TaskStatus.FINISHED );
 			
 			// Check output file
 			validateProduct( act.getNamespace() );
@@ -389,6 +395,7 @@ public class Teapot {
 			
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
+			jobPool.addAll( acts );
 
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {

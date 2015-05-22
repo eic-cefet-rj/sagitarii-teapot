@@ -18,7 +18,7 @@ import cmabreu.sagitarii.teapot.console.CommandLoader;
 public class Main {
 	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.Main" ); 
 	private static CommandLoader cm;
-	private static SystemProperties systemProperties;
+	private static long totalInstancesProcessed = 0;
 	private static Configurator configurator;
 	private static boolean paused = false;
 	private static List<TaskRunner> runners = new ArrayList<TaskRunner>();
@@ -26,12 +26,12 @@ public class Main {
 	private static boolean reloading = false;
 	private static boolean quiting = false;
 	
-	public static SystemProperties getSystemProperties() {
-		return systemProperties;
-	}
-	
 	public static void pause() {
 		paused = true;
+	}
+	
+	public static long getTotalInstancesProcessed() {
+		return totalInstancesProcessed;
 	}
 	
 	public static Configurator getConfigurator() {
@@ -40,10 +40,6 @@ public class Main {
 
 	public static void resume() {
 		paused = false;
-	}
-
-	public static SystemProperties getTaskManager() {
-		return systemProperties;
 	}
 
 	/**
@@ -81,13 +77,12 @@ public class Main {
 			RepositoryManager rm = new RepositoryManager();
 
 			logger.debug("Loading Task Manager ...");
-			systemProperties = new SystemProperties();
-
-			logger.debug("Available processors: " + systemProperties.getAvailableProcessors() + " cores." );
-			logger.debug("SO name / machine: " + systemProperties.getSoName() + " / " + systemProperties.getMachineName() );
-			logger.debug("SO family: " + systemProperties.getOsType() );
-			logger.debug("IP/MAC: " +  systemProperties.getLocalIpAddress() + " / " + systemProperties.getMacAddress() );
-			logger.debug("Java version " + systemProperties.getJavaVersion() );
+			
+			logger.debug("Available processors: " + configurator.getSystemProperties().getAvailableProcessors() + " cores." );
+			logger.debug("SO name / machine: " + configurator.getSystemProperties().getSoName() + " / " + configurator.getSystemProperties().getMachineName() );
+			logger.debug("SO family: " + configurator.getSystemProperties().getOsType() );
+			logger.debug("IP/MAC: " +  configurator.getSystemProperties().getLocalIpAddress() + " / " + configurator.getSystemProperties().getMacAddress() );
+			logger.debug("Java version " + configurator.getSystemProperties().getJavaVersion() );
 			
 			logger.debug("Announce interval: " + configurator.getPoolIntervalMilliSeconds() +"ms." );
 			logger.debug("Sagitarii URL: " + configurator.getHostURL() );
@@ -106,14 +101,14 @@ public class Main {
 			
 			logger.debug("Searching for wrappers...");
 			try {
-				rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
+				rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
 				wrappersDownloaded = true;
 			} catch ( ConnectException e ) {
 				logger.error("Cannot download wrappers. Will interrupt startup until Sagitarii is up.");
 			}
 
 			logger.debug("Staring communicator...");
-			Communicator communicator = new Communicator( configurator, systemProperties );
+			Communicator communicator = new Communicator( configurator, configurator.getSystemProperties() );
 			
 			
 			if ( wrappersDownloaded ) {
@@ -141,7 +136,7 @@ public class Main {
 					String experimentSerial = args[3];
 					String folderName = args[4];
 
-					new Uploader(configurator).uploadCSV(fileName, relationName, experimentSerial, folderName, null, systemProperties );
+					new Uploader(configurator).uploadCSV(fileName, relationName, experimentSerial, folderName, null, configurator.getSystemProperties() );
 					
 					System.exit(0);
 				}
@@ -179,7 +174,7 @@ public class Main {
 				if ( !wrappersDownloaded ) {
 					try {
 						logger.debug("Searching for wrappers...");
-						rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
+						rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
 						wrappersDownloaded = true;
 						logger.debug("Done. Teapot Started.");
 					} catch ( ConnectException e ) {
@@ -190,13 +185,16 @@ public class Main {
 						
 						if ( runners.size() < configurator.getActivationsMaxLimit() ) {
 							logger.debug( "asking Sagitarii for tasks to process...");
-							String response = communicator.announceAndRequestTask( systemProperties.getCpuLoad() );
+							String response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
+									configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
 							if ( response.length() > 0 ) {
 								logger.debug("Sagitarii answered " + response.length() + " bytes");
+								
 								if ( preProcess( response ) ) {
-									TaskRunner tr = new TaskRunner(response, communicator, systemProperties, configurator);
+									TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
 									runners.add(tr);
 									tr.start();
+									totalInstancesProcessed++;
 								}
 							} else {
 								logger.debug("nothing to do for now");
@@ -341,7 +339,7 @@ public class Main {
 			logger.debug("reload all wrappers now.");
 			try {
 				RepositoryManager rm = new RepositoryManager();
-				rm.downloadWrappers( configurator.getHostURL(), systemProperties.getOsType() );
+				rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
 				logger.debug("all wrappers reloaded.");
 			} catch ( Exception e ) {
 				logger.error("cannot reload wrappers: " + e.getMessage() );

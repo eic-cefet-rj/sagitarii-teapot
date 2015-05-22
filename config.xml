@@ -8,8 +8,8 @@
 
 <!DOCTYPE configuration [
 	<!ELEMENT configuration (cluster,proxy) >
-	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,useSpeedEqualizer,activationsMaxLimit,activationShowConsole,rPath,clearDataAfterFinish,
-		CSVDelimiter,storageHost,storagePort,fileSenderDelay)>
+	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,activationsMaxLimit,activationShowConsole,rPath,clearDataAfterFinish,
+		CSVDelimiter,storageHost,storagePort,fileSenderDelay, useSpeedEqualizer, enforceTaskLimitToCores)>
 	<!ELEMENT proxy (useProxy,proxy-host,proxy-port,proxy-password,proxy-user)>
 ]>
 
@@ -18,7 +18,6 @@
 	<cluster>
 		<hostURL>http://localhost:8580/sagitarii/</hostURL>
 		<poolIntervalMilliSeconds>1000</poolIntervalMilliSeconds>
-		<useSpeedEqualizer>false</useSpeedEqualizer>
 		<activationsMaxLimit>50</activationsMaxLimit>
 		<activationShowConsole>false</activationShowConsole>
 		<rPath>C:/rJava/jri</rPath>
@@ -27,6 +26,8 @@
 		<storageHost>localhost</storageHost>
 		<storagePort>3333</storagePort>
 		<fileSenderDelay>200</fileSenderDelay>
+		<useSpeedEqualizer>true</useSpeedEqualizer>
+		<enforceTaskLimitToCores>false</enforceTaskLimitToCores>
 	</cluster>
 
 	<proxy>

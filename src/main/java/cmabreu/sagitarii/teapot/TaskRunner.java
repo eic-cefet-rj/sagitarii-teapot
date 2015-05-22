@@ -26,8 +26,8 @@ public class TaskRunner extends Thread {
 		return serial;
 	}
 	
-	public List<Activation> getExecutionQueue() {
-		return teapot.getExecutionQueue();
+	public List<Activation> getJobPool() {
+		return teapot.getJobPool();
 	}
 	
 	public Task getCurrentTask() {

@@ -25,7 +25,7 @@ public class Upload implements CommandLine.ICommand {
 		System.out.println("Uploading file " + fileName + ". Wait...");
 		
 		try {
-			new Uploader( Main.getConfigurator() ).uploadCSV(fileName, relationName, experimentSerial, folderName, null, Main.getSystemProperties()  );
+			new Uploader( Main.getConfigurator() ).uploadCSV(fileName, relationName, experimentSerial, folderName, null, Main.getConfigurator().getSystemProperties()  );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}

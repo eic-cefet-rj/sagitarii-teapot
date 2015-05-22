@@ -19,13 +19,13 @@ public class CoreSystem implements CommandLine.ICommand {
 			System.out.println("System resumed");
 		}
 		if ( v.get(1).equals("whoami") ) {
-			System.out.println( Main.getTaskManager().getMachineName() + " " + 
-					Main.getTaskManager().getMacAddress() + " " + 
-					Main.getTaskManager().getLocalIpAddress() );
+			System.out.println( Main.getConfigurator().getSystemProperties().getMachineName() + " " + 
+					Main.getConfigurator().getSystemProperties().getMacAddress() + " " + 
+					Main.getConfigurator().getSystemProperties().getLocalIpAddress() );
 		}
 		
 		if ( v.get(1).equals("occupation") ) {
-			System.out.println( "Tasks: " + Main.getRunners().size() + " CPU at " + Main.getTaskManager().getCpuLoad() + "%" ); 
+			System.out.println( "Tasks: " + Main.getRunners().size() + " CPU at " + Main.getConfigurator().getSystemProperties().getCpuLoad() + "%" ); 
 		}
 
 		if ( v.get(1).equals("setspeed") ) {

@@ -30,15 +30,24 @@ public class Configurator {
 	private String storageHost;
 	private int storagePort;
 	private boolean useSpeedEqualizer;
-	
+	private boolean enforceTaskLimitToCores;
+	private SystemProperties systemProperties;
 	private Logger logger = LogManager.getLogger( this.getClass().getName()  );
 
+	public SystemProperties getSystemProperties() {
+		return this.systemProperties;
+	}
+	
 	public char getCSVDelimiter() {
 		return CSVDelimiter;
 	}
 
 	public void setPoolIntervalMilliSeconds( int millis ) {
 		poolIntervalMilliSeconds = millis;
+	}
+	
+	public boolean enforceTaskLimitToCores() {
+		return this.enforceTaskLimitToCores;
 	}
 	
 	public int getFileSenderDelay() {
@@ -128,9 +137,10 @@ public class Configurator {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			doc = dBuilder.parse(is);
 			doc.getDocumentElement().normalize();
-		  } catch (Exception e) {
-				logger.error("XML file " + file + " not found.");
-		  }			
+		} catch (Exception e) {
+			logger.error("XML file " + file + " not found.");
+		}	
+		systemProperties = new SystemProperties();
 	}
 	
 	
@@ -179,6 +189,12 @@ public class Configurator {
 				showConsole = Boolean.parseBoolean( getTagValue("activationShowConsole", mpElement) );
 				clearDataAfterFinish = Boolean.parseBoolean( getTagValue("clearDataAfterFinish", mpElement) );
 				useSpeedEqualizer = Boolean.parseBoolean( getTagValue("useSpeedEqualizer", mpElement) );
+				enforceTaskLimitToCores = Boolean.parseBoolean( getTagValue("enforceTaskLimitToCores", mpElement) );
+				
+				if ( enforceTaskLimitToCores ) {
+					useSpeedEqualizer = false;
+					poolIntervalMilliSeconds = systemProperties.getAvailableProcessors();
+				}
 				
 				useProxy = Integer.parseInt( getValue("proxy", "useProxy") );
 				
