@@ -17,12 +17,13 @@ public class CommandLoader extends Thread {
 
 		CommandLine jr = new CommandLine();
 		jr.setCommandLinePrompt("teapot> ");
-		jr.setCommandLineVersion("Command Line v.01");
+		jr.setCommandLineVersion("Welcome to Teapot Command Line");
 		
 		jr.assignClassToCommnd("logger", "cmabreu.sagitarii.teapot.console.commands.LoggerManager");
 		jr.assignClassToCommnd("show", "cmabreu.sagitarii.teapot.console.commands.Show");
 		jr.assignClassToCommnd("quit", "cmabreu.sagitarii.teapot.console.commands.Quit");
 		jr.assignClassToCommnd("system", "cmabreu.sagitarii.teapot.console.commands.CoreSystem");
+		jr.assignClassToCommnd("upload", "cmabreu.sagitarii.teapot.console.commands.Upload");
 
 		System.out.println("Interactive Mode Activated");
 		System.out.println("");

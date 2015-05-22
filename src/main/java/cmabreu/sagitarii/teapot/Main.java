@@ -26,6 +26,10 @@ public class Main {
 	private static boolean reloading = false;
 	private static boolean quiting = false;
 	
+	public static SystemProperties getSystemProperties() {
+		return systemProperties;
+	}
+	
 	public static void pause() {
 		paused = true;
 	}
@@ -54,6 +58,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Teapot entry point
+	 * 
+	 * EX UNITATE VIRES !
+	 * 
+	 * @param args parameters
+	 */
 	public static void main( String[] args ) {
 		boolean wrappersDownloaded = false;
 		try {
@@ -122,7 +133,7 @@ public class Main {
 				
 				if( args[0].equalsIgnoreCase("upload") )   {
 					if ( args.length != 5 ) {
-						System.out.println("Use teapot upload <arquivo.csv> <nome da relacao> <tag do experimento> <pasta de arquivos>");
+						System.out.println("Use teapot upload <file.csv> <target_table> <experiment_tag> <work_folder>");
 						System.exit(0);
 					}
 					String fileName = args[1];
@@ -179,15 +190,17 @@ public class Main {
 						
 						if ( runners.size() < configurator.getActivationsMaxLimit() ) {
 							logger.debug( "asking Sagitarii for tasks to process...");
-							String response = communicator.anuncia( systemProperties.getCpuLoad() );
-							logger.debug("Sagitarii answered " + response.length() + " bytes");
-							
-							if ( preProcess( response ) ) {
-								TaskRunner tr = new TaskRunner(response, communicator, systemProperties, configurator);
-								runners.add(tr);
-								tr.start();
+							String response = communicator.announceAndRequestTask( systemProperties.getCpuLoad() );
+							if ( response.length() > 0 ) {
+								logger.debug("Sagitarii answered " + response.length() + " bytes");
+								if ( preProcess( response ) ) {
+									TaskRunner tr = new TaskRunner(response, communicator, systemProperties, configurator);
+									runners.add(tr);
+									tr.start();
+								}
+							} else {
+								logger.debug("nothing to do for now");
 							}
-							
 						}
 					}
 				}
@@ -209,6 +222,12 @@ public class Main {
 
 	}
 	
+	/**
+	 * Will check if Sagitarii sent a special command to this node
+	 * 
+	 * @param response Sagitarii response
+	 * @return if can process XML file or not
+	 */
 	private static boolean preProcess( String response ) {
 		logger.debug("checking preprocess");
 		if ( quiting ) {
@@ -285,7 +304,9 @@ public class Main {
 		}
 	}
 
-	
+	/**
+	 * Restart Teapot
+	 */
 	private static void restart() {
 		restarting = true;
 		if ( getRunners().size() > 0 ) {
@@ -296,6 +317,9 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Close Teapot
+	 */
 	private static void quit() {
 		quiting = true;
 		if ( getRunners().size() > 0 ) {
@@ -307,7 +331,7 @@ public class Main {
 	}
 	
 	/**
-	 * Baixa novamente os wrappers
+	 * Download all wrappers from Sagitarii again
 	 */
 	private static void reloadWrappers() {
 		reloading = true;
@@ -331,6 +355,10 @@ public class Main {
 		return new ArrayList<TaskRunner>( runners );
 	}
 	
+	/**
+	 * Remove all finished task threads from buffer
+	 *  
+	 */
 	private static void clearRunners() {
 		logger.debug("cleaning task runners...");
 		int total = 0;
@@ -338,7 +366,7 @@ public class Main {
 		while ( i.hasNext() ) {
 			TaskRunner req = i.next(); 
 			if ( !req.isActive() ) {
-				logger.debug(" > killing task runner " + req.getSerial() );
+				logger.debug(" > killing task runner " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
 				i.remove();
 				total++;
 			}

@@ -41,14 +41,13 @@ public class Communicator  {
 
 
 	/**
-	* Envia uma string contendo uma série de parametros e valores ao servidor
-	* e recebe uma string de resposta.
+	* Send a GET request to Sagitarii
 	* 
-	* Exemplo : targetAction = "pegaDados", parameters = "nome=foo&sobrenome=Bar"
+	* Exemple : targetAction = "myStrutsAction", parameters = "name=foo&sobrenome=Bar"
 	*
-	* @param  targetAction  uma action Struts2 existente no servidor.
-	* @param  parameters um conjunto de nomes e valores no formato URL GET 
-	* @return uma string contendo a resposta do servidor
+	* @param  targetAction  a Struts2 action
+	* @param  parameters the GET request URL 
+	* @return Sagitarii response
 	*/
 	public String send( String targetAction, String parameters ) {
 		String resposta = "COMM_ERROR";
@@ -61,13 +60,13 @@ public class Communicator  {
 	}
 	
 	/**
-	* Envia os dados de configuração da máquina onde o Teapot está sendo executado.
-	* Na resposta, o servidor envia uma tarefa, caso haja alguma.
+	* Announce this node and request for more tasks do process
+	* Sagitarii can send a special command instead (quit, restart, reload wrappers, etc...)
 	* 
-	* @param  cpuLoad  a carga de CPU atual da máquina (em %)
-	* @return uma string contendo a resposta do servidor.
+	* @param  cpuLoad (in %)
+	* @return Sagitarii response
 	*/
-	public synchronized String anuncia( Double cpuLoad ) {
+	public synchronized String announceAndRequestTask( Double cpuLoad ) {
 		String parameters = "soName=" + soName + "&localIpAddress=" + localIpAddress + 
 				"&machineName=" + machineName + "&macAddress=" + macAddress + "&cpuLoad=" + cpuLoad +
 				"&availableProcessors=" + availableProcessors + "&soFamily=" + soFamily +

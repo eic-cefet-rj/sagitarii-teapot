@@ -5,6 +5,10 @@ public class SpeedEqualizer {
 	private static int originalValue = -1;
 	
 	public static void equalize( Configurator configurator, int totalTasksRunning ) {
+		// Do not set getPoolIntervalMilliSeconds to more than 4000ms or Sagitarii will think we are dead.
+
+		double dangerousLimit = ( configurator.getActivationsMaxLimit() - ( configurator.getActivationsMaxLimit() / 7 ) );
+		double redLineLimit = ( configurator.getActivationsMaxLimit() - ( configurator.getActivationsMaxLimit() / 5 ) );
 		
 		if ( !configurator.useSpeedEqualizer() ) {
 			return;
@@ -19,28 +23,21 @@ public class SpeedEqualizer {
 		configurator.setPoolIntervalMilliSeconds( originalValue );
 
 		// Sagitarii may have no tasks for us
-		// Do not set more than 4000ms or Sagitarii will think we are dead.
 		if ( totalTasksRunning == 0 ) {
 			configurator.setPoolIntervalMilliSeconds( 4000 );
-			logger.debug("speed equalized to " + configurator.getPoolIntervalMilliSeconds() );
+			logger.debug("system is idle. sleep interval set to " + configurator.getPoolIntervalMilliSeconds() + "ms" );
 		}
 
-		// Too few tasks ( less than half ): Speed up
-		if ( ( totalTasksRunning > 0 ) && ( totalTasksRunning < ( configurator.getActivationsMaxLimit() / 2 ) ) ) {
-			configurator.setPoolIntervalMilliSeconds( 200 );
-			logger.debug("speed equalized to " + configurator.getPoolIntervalMilliSeconds() );
-		}
-		
 		// Too close to limit: slow down
-		if ( totalTasksRunning >= ( configurator.getActivationsMaxLimit() - ( configurator.getActivationsMaxLimit() / 5 ) ) ) {
+		if ( (totalTasksRunning > redLineLimit) && ( totalTasksRunning < dangerousLimit )) {
 			configurator.setPoolIntervalMilliSeconds( 2000 );
-			logger.debug("speed equalized to " + configurator.getPoolIntervalMilliSeconds() );
+			logger.debug("task buffer is close to the limit. sleep interval set to " + configurator.getPoolIntervalMilliSeconds() + "ms" );
 		}
 
-		// Near stress limit : push the brakes!
-		if ( totalTasksRunning >= ( configurator.getActivationsMaxLimit() - ( configurator.getActivationsMaxLimit() / 7 ) ) ) {
-			configurator.setPoolIntervalMilliSeconds( 3000 );
-			logger.debug("speed equalized to " + configurator.getPoolIntervalMilliSeconds() );
+		// Living in the edge: push the brakes!
+		if ( totalTasksRunning > dangerousLimit ) {
+			configurator.setPoolIntervalMilliSeconds( 3500 );
+			logger.debug("task buffer is almost full. sleep interval set to " + configurator.getPoolIntervalMilliSeconds() +"ms" );
 		}
 		
 	}
