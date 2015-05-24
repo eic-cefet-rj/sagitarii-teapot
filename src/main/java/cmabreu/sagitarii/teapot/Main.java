@@ -182,24 +182,32 @@ public class Main {
 					}
 				} else {
 					if ( !paused ) {
-						
-						if ( runners.size() < configurator.getActivationsMaxLimit() ) {
-							logger.debug( "asking Sagitarii for tasks to process...");
-							String response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
-									configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
-							if ( response.length() > 0 ) {
-								logger.debug("Sagitarii answered " + response.length() + " bytes");
-								
-								if ( preProcess( response ) ) {
-									TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
-									runners.add(tr);
-									tr.start();
-									totalInstancesProcessed++;
+						String response = "NO_DATA";
+						try {
+							if ( runners.size() < configurator.getActivationsMaxLimit() ) {
+								logger.debug( "asking Sagitarii for tasks to process...");
+								response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
+										configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
+								if ( response.length() > 0 ) {
+									logger.debug("Sagitarii answered " + response.length() + " bytes");
+									
+									if ( preProcess( response ) ) {
+										TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
+										runners.add(tr);
+										tr.start();
+										totalInstancesProcessed++;
+									}
+								} else {
+									logger.debug("nothing to do for now");
 								}
-							} else {
-								logger.debug("nothing to do for now");
 							}
+						} catch ( Exception e ) {
+							logger.error( "process error: " + e.getMessage() );
+							logger.error( " > " + response );
 						}
+						
+						
+						
 					}
 				}
 				
