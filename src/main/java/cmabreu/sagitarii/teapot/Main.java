@@ -191,11 +191,15 @@ public class Main {
 								if ( response.length() > 0 ) {
 									logger.debug("Sagitarii answered " + response.length() + " bytes");
 									
-									if ( preProcess( response ) ) {
-										TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
-										runners.add(tr);
-										tr.start();
-										totalInstancesProcessed++;
+									if ( response.equals("COMM_ERROR") ) {
+										logger.error("Sagitarii is offline");
+									} else {
+										if ( preProcess( response ) ) {
+											TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
+											runners.add(tr);
+											tr.start();
+											totalInstancesProcessed++;
+										}
 									}
 								} else {
 									logger.debug("nothing to do for now");

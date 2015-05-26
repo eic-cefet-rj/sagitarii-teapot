@@ -17,6 +17,7 @@ import java.util.zip.GZIPOutputStream;
 import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
+import cmabreu.sagitarii.teapot.Task;
  
 public class Client {
 	private List<String> filesToSend;
@@ -38,16 +39,30 @@ public class Client {
 	
 	
 	public void sendFile( String fileName, String folder, String targetTable, String experimentSerial,  
-			String macAddress, String pipelineSerial, String activity, String fragment ) throws Exception {
+			String macAddress, Task task ) throws Exception {
 
+		
+		String pipelineSerial = "";
+		String activity = "";
+		String fragment = "";
+		String taskId = "";
+		String exitCode = "0";
+		if ( task != null ) {
+			pipelineSerial = task.getActivation().getPipelineSerial();
+			activity = task.getActivation().getActivitySerial();
+			fragment = task.getActivation().getFragment();
+			exitCode = String.valueOf( task.getExitCode() );
+			taskId = task.getActivation().getTaskId();
+		}			
+		
 		getSessionKey();
 		
 		StringBuilder xml = new StringBuilder();
 		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
 		xml.append("<session macAddress=\""+macAddress+"\" instance=\""+pipelineSerial+
-				"\" activity=\""+activity+"\"  fragment=\""+fragment+"\" experiment=\""+experimentSerial+
-				"\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
+				"\" activity=\""+activity+"\"  taskId=\""+taskId+"\" exitCode=\""+exitCode+"\" fragment=\""+fragment + 
+				"\" experiment=\""+experimentSerial + "\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
 		
 		xml.append("<file name=\""+fileName+"\" type=\"FILE_TYPE_CSV\" />\n");
 		filesToSend.add( folder + File.separator + fileName );
@@ -60,6 +75,14 @@ public class Client {
 	        }
 	    }
 		
+	    xml.append("<console>");
+	    if ( task != null ) {
+	    	for ( String line : task.getConsole() ) {
+	    		xml.append( line + "\n" );
+	    	}
+	    }
+	    xml.append("</console>");
+	    
 		xml.append("</session>\n");
 		filesToSend.add( folder + File.separator + "session.xml" );
 		PrintWriter writer = new PrintWriter( new FileOutputStream(folder + File.separator + "session.xml") );

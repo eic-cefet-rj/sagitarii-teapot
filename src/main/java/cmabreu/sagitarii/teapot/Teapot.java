@@ -73,7 +73,7 @@ public class Teapot {
 	
 
 	private void sanitize( Task task ) {
-		if ( ( task.getExitCode() == 0 ) && gf.getClearDataAfterFinish() ) {
+		if ( gf.getClearDataAfterFinish() ) {
 			try {
 				FileUtils.deleteDirectory( new File( task.getActivation().getNamespace() ) ); 
 			} catch ( IOException e ) {
@@ -218,8 +218,7 @@ public class Teapot {
 	        tasks.add(task);
 	        currentTask = task;
 	        
-	        
-	        // Block
+	        // Will Block Until Finished ...
 	        task.run();
 	        
 	        // When finished...

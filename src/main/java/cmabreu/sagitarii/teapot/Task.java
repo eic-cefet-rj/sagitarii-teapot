@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Task {
 	private List<String> sourceData;
+	private List<String> console;
 	private String applicationName;
 	private TaskStatus status;
 	private int exitCode;
@@ -18,6 +20,10 @@ public class Task {
 		return sourceData;
 	}
 
+	public List<String> getConsole() {
+		return console;
+	}
+	
 	public void setSourceData(List<String> sourceData) {
 		this.sourceData = sourceData;
 	}
@@ -39,6 +45,7 @@ public class Task {
         this.activation = activation;
         status = TaskStatus.STOPPED;
         this.activation = activation;
+        this.console = new ArrayList<String>();
 	}
 
 	/**
@@ -57,6 +64,7 @@ public class Task {
         	BufferedReader br = new BufferedReader( new InputStreamReader(in) );
         	String line = null;
         	while( ( line=br.readLine() )!=null ) {
+        		console.add( line );
         		logger.debug( "[" + activation.getActivitySerial() + "] " + activation.getExecutor() + " > " + line );
         	}        	
         	

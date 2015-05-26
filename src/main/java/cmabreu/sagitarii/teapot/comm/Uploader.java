@@ -29,26 +29,11 @@ public class Uploader {
 			String filesFolderName, Task task, SystemProperties tm) throws Exception {
 		
 		String macAddress = tm.getMacAddress();
-		
 		logger.debug( "uploading " + fileName + " to " + relationName + " for experiment " + experimentSerial );
 		
-		String pipelineSerial = "";
-		String activity = "";
-		String fragment = "";
-		
-		if ( task != null ) {
-			pipelineSerial = task.getActivation().getPipelineSerial();
-			activity = task.getActivation().getActivitySerial();
-			fragment = task.getActivation().getFragment();
-		}		
-		
 		Client client = new Client( gf );
-		
-		client.sendFile( fileName, filesFolderName,	relationName, experimentSerial, macAddress, 
-				pipelineSerial, activity, fragment );
-
+		client.sendFile( fileName, filesFolderName,	relationName, experimentSerial, macAddress, task );
 		logger.debug( "done uploading " + fileName);
-
 	}
 
 }

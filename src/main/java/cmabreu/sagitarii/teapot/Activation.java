@@ -187,10 +187,6 @@ public class Activation implements Comparable<Activation> {
 		this.targetTable = targetTable;
 	}
 
-	public int getPipelineIdXX() {
-		return pipelineId;
-	}
-
 	public void setPipelineId(int pipelineId) {
 		this.pipelineId = pipelineId;
 	}
