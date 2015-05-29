@@ -11,7 +11,7 @@ public class CoreSystem implements CommandLine.ICommand {
 	public boolean doIt( List<String> v ) {
 
 		if ( v.size() == 1 ) {
-			System.out.println("usage: system <pause | resume | whoami | occupation>");
+			System.out.println("usage: system <pause | resume | whoami | loadlevel>");
 			return true;
 		}
 
@@ -30,7 +30,7 @@ public class CoreSystem implements CommandLine.ICommand {
 					Main.getConfigurator().getSystemProperties().getLocalIpAddress() );
 		}
 		
-		if ( v.get(1).equals("occupation") ) {
+		if ( v.get(1).equals("loadlevel") ) {
 			System.out.println( "Tasks: " + Main.getRunners().size() + " CPU at " + Main.getConfigurator().getSystemProperties().getCpuLoad() + "%" ); 
 		}
 

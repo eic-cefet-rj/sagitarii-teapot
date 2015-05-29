@@ -21,7 +21,10 @@ public class CommandLoader extends Thread {
 		
 		jr.assignClassToCommnd("logger", "cmabreu.sagitarii.teapot.console.commands.LoggerManager");
 		jr.assignClassToCommnd("show", "cmabreu.sagitarii.teapot.console.commands.Show");
+
 		jr.assignClassToCommnd("quit", "cmabreu.sagitarii.teapot.console.commands.Quit");
+		jr.assignClassToCommnd("exit", "cmabreu.sagitarii.teapot.console.commands.Quit");
+		
 		jr.assignClassToCommnd("system", "cmabreu.sagitarii.teapot.console.commands.CoreSystem");
 		jr.assignClassToCommnd("upload", "cmabreu.sagitarii.teapot.console.commands.Upload");
 
