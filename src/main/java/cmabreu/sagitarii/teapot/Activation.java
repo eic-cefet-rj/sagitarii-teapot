@@ -15,7 +15,7 @@ public class Activation implements Comparable<Activation> {
 	private String workflow;
 	private String activitySerial;
 	private String command;
-	private String pipelineSerial;
+	private String instanceSerial;
 	private String taskId;
 	private List<String> sourceData = new ArrayList<String>();
 	private Activation previousActivation;
@@ -25,7 +25,7 @@ public class Activation implements Comparable<Activation> {
 	private String executorType;
 	private String targetTable;
 	private List<FileUnity> files;
-	private int pipelineId;
+	private int instanceId;
 	private TaskStatus status = TaskStatus.QUEUED;
 	
 	public TaskStatus getStatus() {
@@ -88,7 +88,7 @@ public class Activation implements Comparable<Activation> {
 	public String getNamespace() {
 		String result = "";
 		try {
-			result = getExperimentRootFolder() + File.separator + fragment + File.separator + pipelineSerial + File.separator + taskId;
+			result = getExperimentRootFolder() + File.separator + fragment + File.separator + instanceSerial + File.separator + taskId;
 		} catch ( Exception e ) {
 			
 		}
@@ -126,12 +126,12 @@ public class Activation implements Comparable<Activation> {
 		this.command = command;
 	}
 	
-	public String getPipelineSerial() {
-		return pipelineSerial;
+	public String getInstanceSerial() {
+		return instanceSerial;
 	}
 	
-	public void setPipelineSerial(String pipelineSerial) {
-		this.pipelineSerial = pipelineSerial;
+	public void setInstanceSerial(String instanceSerial) {
+		this.instanceSerial = instanceSerial;
 	}
 	
 	@Override
@@ -187,8 +187,8 @@ public class Activation implements Comparable<Activation> {
 		this.targetTable = targetTable;
 	}
 
-	public void setPipelineId(int pipelineId) {
-		this.pipelineId = pipelineId;
+	public void setInstanceId(int instanceId) {
+		this.instanceId = instanceId;
 	}
 
 	

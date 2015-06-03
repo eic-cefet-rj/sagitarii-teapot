@@ -28,7 +28,7 @@ public class Show implements CommandLine.ICommand {
 				if ( taskRequester.getCurrentTask() != null ) {
 					String time = taskRequester.getStartTime() + " (" + (long)taskRequester.getTime() + "s)";
 					
-					String line = taskRequester.getCurrentTask().getActivation().getPipelineSerial() + " ";
+					String line = taskRequester.getCurrentTask().getActivation().getInstanceSerial() + " ";
 					
 					for ( Activation activation :  taskRequester.getJobPool() ) {
 						line = line + "[" + activation.getExecutor() + " | " + activation.getStatus().toString() + "] ";

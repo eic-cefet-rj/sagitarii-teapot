@@ -42,13 +42,13 @@ public class Client {
 			String macAddress, Task task ) throws Exception {
 
 		
-		String pipelineSerial = "";
+		String instanceSerial = "";
 		String activity = "";
 		String fragment = "";
 		String taskId = "";
 		String exitCode = "0";
 		if ( task != null ) {
-			pipelineSerial = task.getActivation().getPipelineSerial();
+			instanceSerial = task.getActivation().getInstanceSerial();
 			activity = task.getActivation().getActivitySerial();
 			fragment = task.getActivation().getFragment();
 			exitCode = String.valueOf( task.getExitCode() );
@@ -60,7 +60,7 @@ public class Client {
 		StringBuilder xml = new StringBuilder();
 		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
-		xml.append("<session macAddress=\""+macAddress+"\" instance=\""+pipelineSerial+
+		xml.append("<session macAddress=\""+macAddress+"\" instance=\""+instanceSerial+
 				"\" activity=\""+activity+"\"  taskId=\""+taskId+"\" exitCode=\""+exitCode+"\" fragment=\""+fragment + 
 				"\" experiment=\""+experimentSerial + "\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
 		

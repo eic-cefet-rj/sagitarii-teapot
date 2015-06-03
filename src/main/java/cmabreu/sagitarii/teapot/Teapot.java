@@ -202,10 +202,10 @@ public class Teapot {
 	 */
 	private void runTask( Activation activation ) {
 		String applicationName = activation.getCommand();
-		String pipelineId = activation.getPipelineSerial();
+		String instanceId = activation.getInstanceSerial();
 		int order = activation.getOrder();
 
-		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ pipelineId + "-" + order + "):");
+		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ instanceId + "-" + order + "):");
 		logger.debug( applicationName );
         
 		activation.setStatus( TaskStatus.RUNNING );
@@ -214,7 +214,7 @@ public class Teapot {
 		task.setSourceData( activation.getSourceData() );
 		
 		try {
-			comm.send("activityManagerReceiver", "pipelineId=" + activation.getPipelineSerial() + "&response=RUNNING&node=" + tm.getMacAddress() + "&executor" + activation.getExecutor() );
+			comm.send("activityManagerReceiver", "instanceId=" + activation.getInstanceSerial() + "&response=RUNNING&node=" + tm.getMacAddress() + "&executor" + activation.getExecutor() );
 	        tasks.add(task);
 	        currentTask = task;
 	        
@@ -278,7 +278,7 @@ public class Teapot {
 	
 	/** 
 	 * Salva os dados iniciais em um diretório para trabalho.
-	 * O diretório criado é referente ao código do pipeline, o serial da atividade
+	 * O diretório criado é referente ao código do instance, o serial da atividade
 	 * e o serial da tarefa.
 	 * 
 	 * @param act 
@@ -389,7 +389,7 @@ public class Teapot {
 	 */
 	public void process( String response ) throws Exception {
 		logger.debug("process");
-		String pipelineSerial = "";
+		String instanceSerial = "";
 		try {
 			
 			List<Activation> acts = parser.parseActivations( response );
@@ -399,8 +399,8 @@ public class Teapot {
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
 					
-					logger.debug("execute first task in instance " + act.getPipelineSerial() );
-					pipelineSerial = act.getPipelineSerial();
+					logger.debug("execute first task in instance " + act.getInstanceSerial() );
+					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
 					String newCommand = generateCommand( act );
 					act.setCommand( newCommand );
@@ -412,7 +412,7 @@ public class Teapot {
 			}
 			
 		} catch (Exception e) {
-			comm.send("activityManagerReceiver", "pipelineId=" + pipelineSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
+			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
 			sendErrorLog( e.getMessage() );
 		}
 	}
