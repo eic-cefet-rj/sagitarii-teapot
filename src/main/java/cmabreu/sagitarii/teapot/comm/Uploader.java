@@ -15,7 +15,6 @@ public class Uploader {
 	public Uploader( Configurator gf  ) {
 		this.gf = gf;
 	}
-
 	
 	/**
 	 * Envia um arquivo CSV ao servidor

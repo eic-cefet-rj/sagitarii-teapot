@@ -25,6 +25,7 @@ public class Main {
 	private static boolean restarting = false;
 	private static boolean reloading = false;
 	private static boolean quiting = false;
+	private static Communicator communicator;
 	
 	public static void pause() {
 		paused = true;
@@ -108,7 +109,7 @@ public class Main {
 			}
 
 			logger.debug("Staring communicator...");
-			Communicator communicator = new Communicator( configurator, configurator.getSystemProperties() );
+			communicator = new Communicator( configurator, configurator.getSystemProperties() );
 			
 			
 			if ( wrappersDownloaded ) {
@@ -209,10 +210,8 @@ public class Main {
 							logger.error( "process error: " + e.getMessage() );
 							logger.error( " > " + response );
 						}
-						
-						
-						
 					}
+					sendRunners();
 				}
 				
 				try {
@@ -230,6 +229,38 @@ public class Main {
 			e.printStackTrace();
 		}
 
+	}
+	
+
+	private static String generateJsonPair(String paramName, String paramValue) {
+		return "\"" + paramName + "\":\"" + paramValue + "\""; 
+	}
+
+	private static String addArray(String paramName, String arrayValue) {
+		return "\"" + paramName + "\":" + arrayValue ; 
+	}
+
+	private static void sendRunners() {
+		StringBuilder sb = new StringBuilder();
+		String dataPrefix = "";
+		sb.append("[");
+		for ( TaskRunner tr : getRunners() ) {
+			sb.append( dataPrefix + "{");
+			sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
+			sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
+			sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," ); 
+			sb.append( generateJsonPair( "elapsedTime" , String.valueOf( tr.getTime() ) ) );
+			dataPrefix = ",";
+			sb.append("}");
+		}
+		sb.append("]");
+		StringBuilder data = new StringBuilder();
+		data.append("{");
+		data.append( generateJsonPair( "nodeId" , configurator.getSystemProperties().getMacAddress() ) + "," );
+		data.append( addArray("data", sb.toString() ) ); 
+		data.append("}");			
+		
+		communicator.doPost("receiveNodeTasks", "tasks", data.toString() );
 	}
 	
 	/**

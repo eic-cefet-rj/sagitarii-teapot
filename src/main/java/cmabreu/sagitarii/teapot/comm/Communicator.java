@@ -38,7 +38,17 @@ public class Communicator  {
 		}
 	}
 
-
+	public String doPost( String targetAction, String parameter, String content) {
+		String resposta = "COMM_ERROR";
+		try { 
+			webClient.doPost(targetAction, parameter, content);
+			resposta = "OK";
+		} catch ( Exception e ) {
+			logger.error("Communication error: " + e.getMessage() );
+		} 
+		return resposta;
+	}
+	
 	/**
 	* Send a GET request to Sagitarii
 	* 

@@ -2,15 +2,23 @@ package cmabreu.sagitarii.teapot.comm;
 
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreProtocolPNames;
 
 import cmabreu.sagitarii.teapot.Configurator;
@@ -26,7 +34,20 @@ public class WebClient {
 		return gf;
 	}
 
-		
+	public void doPost( String action, String parameter, String content) throws Exception {
+		HttpClient httpclient = HttpClients.createDefault();
+		HttpPost httppost = new HttpPost( gf.getHostURL() + "/" + action );
+
+		// Request parameters and other properties.
+		List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+		params.add(new BasicNameValuePair( parameter, content) );
+		//params.add(new BasicNameValuePair("param-2", "Hello!"));
+		httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+		httpclient.execute(httppost);
+
+	}
+
 	public String doGet(String action, String parameter) throws Exception {
 		String resposta = "SEM_RESPOSTA";
 		String mhpHost = gf.getHostURL();
