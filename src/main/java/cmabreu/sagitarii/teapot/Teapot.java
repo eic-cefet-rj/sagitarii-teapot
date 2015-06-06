@@ -154,13 +154,7 @@ public class Teapot {
 	}
 	
 	
-	/**
-	 * Procura a proxima ativacao da fila de instancias recebidos que tenha numero de ordem 
-	 * imediatamente superior à informada e que esteja na mesma instância.
-	 * Caso não encontre, a instância foi toda executada. Não faz nada.
-	 * 
-	 * @param task Última tarefa executada
-	 */
+
 	private void executeNext( Task task ) {
 		logger.debug("searching for instance tasks for task " + task.getActivation().getExecutor() + " (index " + task.getActivation().getOrder() + ") fragment " + task.getActivation().getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());

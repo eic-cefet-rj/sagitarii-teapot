@@ -163,7 +163,7 @@ public class Main {
 				clearRunners();
 				logger.debug( "init new cycle: " + runners.size() + " of " + configurator.getActivationsMaxLimit() + " tasks running:" );
 				
-				for ( TaskRunner tr : runners ) {
+				for ( TaskRunner tr : getRunners() ) {
 					if ( tr.getCurrentTask() != null ) {
 						String time = tr.getStartTime() + " (" + tr.getTime() + "s)";
 						logger.debug( " > " + tr.getCurrentTask().getTaskId() + " (" + tr.getCurrentTask().getActivation().getExecutor() + ") : " + time);
@@ -196,6 +196,7 @@ public class Main {
 										logger.error("Sagitarii is offline");
 									} else {
 										if ( preProcess( response ) ) {
+											logger.debug("starting new process");
 											TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
 											runners.add(tr);
 											tr.start();
@@ -241,17 +242,23 @@ public class Main {
 	}
 
 	private static void sendRunners() {
+		logger.debug("sending " + getRunners().size() + " Task Runners to Sagitarii " + runners.size() );
 		StringBuilder sb = new StringBuilder();
 		String dataPrefix = "";
 		sb.append("[");
 		for ( TaskRunner tr : getRunners() ) {
-			sb.append( dataPrefix + "{");
-			sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
-			sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
-			sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," ); 
-			sb.append( generateJsonPair( "elapsedTime" , String.valueOf( tr.getTime() ) ) );
-			dataPrefix = ",";
-			sb.append("}");
+			if ( tr.getCurrentTask() != null ) {
+				logger.debug( " > " + tr.getCurrentTask().getTaskId() + " sent" );
+				sb.append( dataPrefix + "{");
+				sb.append( generateJsonPair( "workflow" , tr.getCurrentTask().getActivation().getWorkflow() ) + "," );
+				sb.append( generateJsonPair( "experiment" , tr.getCurrentTask().getActivation().getExperiment() ) + "," );
+				sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
+				sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
+				sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," ); 
+				sb.append( generateJsonPair( "elapsedTime" , String.valueOf( tr.getTime() ) ) );
+				dataPrefix = ",";
+				sb.append("}");
+			}
 		}
 		sb.append("]");
 		StringBuilder data = new StringBuilder();
@@ -260,7 +267,10 @@ public class Main {
 		data.append( addArray("data", sb.toString() ) ); 
 		data.append("}");			
 		
+		logger.debug(" done sending Task Runners: " + data.toString() );
+		
 		communicator.doPost("receiveNodeTasks", "tasks", data.toString() );
+		
 	}
 	
 	/**
@@ -408,7 +418,7 @@ public class Main {
 			TaskRunner req = i.next(); 
 			if ( !req.isActive() ) {
 				try {
-					logger.debug(" > killing task runner " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
+					logger.debug(" > killing task runner " + req.getCurrentTask().getActivation().getExecutor() + " " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
 				} catch ( Exception e ) { 
 					logger.debug(" > killing null task runner");
 				}
