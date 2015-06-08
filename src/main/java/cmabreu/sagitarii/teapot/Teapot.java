@@ -89,8 +89,8 @@ public class Teapot {
 	 * @return true if the file have some data
 	 */
 	private void validateProduct( String taskFolder ) {
-		String sagiOutput = taskFolder + File.separator + "sagi_output.txt";
-		String outbox = taskFolder + File.separator + "outbox";
+		String sagiOutput = taskFolder + "/" + "sagi_output.txt";
+		String outbox = taskFolder + "/" + "outbox";
 
 		logger.debug("check output folder " + outbox );
 		
@@ -265,10 +265,10 @@ public class Teapot {
 	 * @throws Exception
 	 */
 	private void createWorkFolder( Activation act ) throws Exception {
-		File outputFolder = new File( act.getNamespace() + File.separator + "outbox" );
+		File outputFolder = new File( act.getNamespace() + "/" + "outbox" );
 		outputFolder.mkdirs();
 
-		File inputFolder = new File( act.getNamespace() + File.separator + "inbox" );
+		File inputFolder = new File( act.getNamespace() + "/" + "inbox" );
 		inputFolder.mkdirs();
 	}
 	
@@ -292,14 +292,14 @@ public class Teapot {
 		Activation previous = act.getPreviousActivation(); 
 		if ( previous != null ) {
 			// So this is not the first task inside instance. 
-			String previousOutbox = previous.getNamespace() + File.separator + "outbox";
-			String destInbox = act.getNamespace() + File.separator + "inbox";
+			String previousOutbox = previous.getNamespace() + "/" + "outbox";
+			String destInbox = act.getNamespace() + "/" + "inbox";
 
 			// Copy sagi_output.txt from previous task to this task source data.
-			act.setSourceData( readFile( previous.getNamespace() + File.separator + "sagi_output.txt" ) );
+			act.setSourceData( readFile( previous.getNamespace() + "/" + "sagi_output.txt" ) );
 
 			// Save previous output as this input
-			FileWriter writer = new FileWriter( act.getNamespace() + File.separator + "sagi_input.txt"); 
+			FileWriter writer = new FileWriter( act.getNamespace() + "/" + "sagi_input.txt"); 
 			for(String str: act.getSourceData() ) {
 			  writer.write( str + "\n" );
 			}
@@ -318,7 +318,7 @@ public class Teapot {
 			}
 		} else {
 			// This is the first task in instance
-			FileWriter writer = new FileWriter( act.getNamespace() + File.separator + "sagi_input.txt"); 
+			FileWriter writer = new FileWriter( act.getNamespace() + "/" + "sagi_input.txt"); 
 			for(String str: act.getSourceData() ) {
 			  writer.write( str + "\n" );
 			}
@@ -332,7 +332,7 @@ public class Teapot {
 				for ( FileUnity file : act.getFiles() ) {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
 					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId() + "&experiment=" + act.getExperiment();
-					String target = act.getNamespace() + File.separator + "inbox" + File.separator + file.getName();
+					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					dl.download(url, target, true);
 				}
 			} else {
@@ -371,7 +371,7 @@ public class Teapot {
 	}
 	
 	private void saveXmlData( Activation act ) throws Exception {
-		FileWriter writer = new FileWriter( act.getNamespace() + File.separator + "sagi_source_data.xml"); 
+		FileWriter writer = new FileWriter( act.getNamespace() + "/" + "sagi_source_data.xml"); 
 		String xml = act.getXmlOriginalData();
 		xml = xml.replaceAll("><", ">\n<");
 		writer.write( xml );
