@@ -175,7 +175,9 @@ public class Teapot {
 						saveInputData( nextAct );
 						runTask( nextAct );
 					} catch ( Exception e ) {
-						e.printStackTrace();
+						logger.error( e.getMessage() );
+						comm.send("activityManagerReceiver", "instanceId=" + nextAct.getInstanceSerial() + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
+						sendErrorLog( e.getMessage() );
 					}
 					return;
 				} else {
@@ -339,7 +341,7 @@ public class Teapot {
 	
 		}
 		
-		logger.debug("all data were prepared for task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
+		logger.debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
 	}
 	
 	// Read a text file and save into a List
@@ -406,6 +408,7 @@ public class Teapot {
 			}
 			
 		} catch (Exception e) {
+			logger.error( e.getMessage() );
 			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
 			sendErrorLog( e.getMessage() );
 		}

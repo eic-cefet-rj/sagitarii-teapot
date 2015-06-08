@@ -45,11 +45,16 @@ public class Downloader {
 		FileOutputStream fos = new FileOutputStream( fileName );
 		fos.write(response);
 		fos.close();
-		logger.debug("done downloading " + fileName );
 		
-		if ( decompress ) {
-			decompress(fileName, to);
-			new File( fileName ).delete();
+		File check = new File( fileName );
+		if ( check.exists() ) {
+			logger.debug("done downloading " + fileName );
+			if ( decompress ) {
+				decompress(fileName, to);
+				new File( fileName ).delete();
+			}
+		} else {
+			throw new Exception("File "+fileName+" was not received! Check file in Sagitarii repository.");
 		}
 	}
 
