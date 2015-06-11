@@ -58,7 +58,7 @@ public class Downloader {
 		}
 	}
 
-	public void decompress( String compressedFile, String decompressedFile ) {
+	public void decompress( String compressedFile, String decompressedFile ) throws Exception {
 		logger.debug("uncompressing " + compressedFile + "...");
 		byte[] buffer = new byte[1024];
 		try {
@@ -74,7 +74,7 @@ public class Downloader {
 			logger.debug("file was decompressed successfully");
 		} catch (IOException ex) {
 			logger.error("error decompressing file: " + ex.getMessage() );
-			ex.printStackTrace();
+			throw new Exception( ex.getMessage() );
 		}
 	}
 

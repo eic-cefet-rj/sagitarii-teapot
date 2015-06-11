@@ -273,9 +273,7 @@ public class Teapot {
 	}
 	
 	/** 
-	 * Salva os dados iniciais em um diretório para trabalho.
-	 * O diretório criado é referente ao código do instance, o serial da atividade
-	 * e o serial da tarefa.
+	 * Salva os dados iniciais em uma pasta para trabalho.
 	 * 
 	 * @param act 
 	 * @throws Exception
