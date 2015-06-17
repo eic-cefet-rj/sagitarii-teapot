@@ -142,11 +142,6 @@ public class Main {
 					System.exit(0);
 				}
 				
-				if ( args[0].equalsIgnoreCase("pwd") ) {
-					System.out.println( new Activation().getNamespace() );
-					System.exit(0);
-				}
-				
 				if ( args[0].equalsIgnoreCase("download") ) {
 					String fileId = args[1];
 					String saveTo = args[2];
@@ -282,19 +277,19 @@ public class Main {
 	private static boolean preProcess( String response ) {
 		logger.debug("checking preprocess");
 		if ( quiting ) {
-			// If we're here, is becaus the first call not finished (have tasks still running),
+			// If we're here, is because the first call not finished (have tasks still running),
 			// so we'll try again
 			quit();
 			return false;
 		}
 		if ( restarting ) {
-			// If we're here, is becaus the first call not finished (have tasks still running), 
+			// If we're here, is because the first call not finished (have tasks still running), 
 			// so we'll try again
 			restart();
 			return false;
 		}
 		if ( reloading ) {
-			// If we're here, is becaus the first call not finished (have tasks still running), 
+			// If we're here, is because the first call not finished (have tasks still running), 
 			// so we'll try again
 			reloadWrappers();
 			return false;
@@ -385,6 +380,10 @@ public class Main {
 	 * Download all wrappers from Sagitarii again
 	 */
 	private static void reloadWrappers() {
+		if( reloading ) {
+			logger.debug("already reloading... will wait.");
+			return;
+		}
 		reloading = true;
 		if ( getRunners().size() > 0 ) {
 			logger.debug("cannot reload wrappers now. " + getRunners().size() + " tasks still runnig");
@@ -401,7 +400,6 @@ public class Main {
 		}
 	}
 
-	
 	public static List<TaskRunner> getRunners() {
 		return new ArrayList<TaskRunner>( runners );
 	}
