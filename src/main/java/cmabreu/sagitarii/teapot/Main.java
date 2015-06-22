@@ -255,7 +255,7 @@ public class Main {
 	}
 
 	private static void sendRunners() {
-		logger.debug("sending " + getRunners().size() + " Task Runners to Sagitarii " + runners.size() );
+		logger.debug("sending " + getRunners().size() + " Task Runners to Sagitarii ");
 		StringBuilder sb = new StringBuilder();
 		String dataPrefix = "";
 		sb.append("[");
@@ -326,6 +326,11 @@ public class Main {
 				logger.debug("get quit command from Sagitarii");
 				quit();
 			} else
+				if ( response.contains( "INFORM" ) ) {
+					String[] data = response.split("#");
+					logger.debug("Sagitarii is asking for Instance " + data[1] );
+					inform( data[1] );
+				} else
 			if ( response.equals( "COMM_CLEAN_WORKSPACE" ) ) {
 				logger.debug("get clean workspace command from Sagitarii");
 				if (  getRunners().size() > 0 ) {
@@ -378,6 +383,23 @@ public class Main {
 		} else {
 			logger.debug("restart now.");
 			restartApplication();
+		}
+	}
+	
+	private static void inform( String instanceSerial ) {
+		boolean found = false;
+		for ( TaskRunner tr : getRunners() ) {
+			if ( tr.getCurrentTask() != null ) {
+				if ( tr.getCurrentTask().getActivation().getInstanceSerial().equals( instanceSerial ) ) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if ( found ) {
+			logger.debug("Instance "+instanceSerial+" is running");
+		} else {
+			logger.debug("Instance "+instanceSerial+" not found");
 		}
 	}
 	

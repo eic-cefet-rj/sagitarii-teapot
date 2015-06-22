@@ -45,7 +45,7 @@ public class Downloader {
 			fileName = fileName + ".gz";
 		}
 		
-		logger.debug("downloading " + fileName + ". may take some time.");
+		logger.debug("downloading " + fileName + "... may take some time.");
 		
 		URL link = new URL(from); 	
 		InputStream in = new BufferedInputStream(link.openStream());
@@ -65,7 +65,11 @@ public class Downloader {
 		
 		File check = new File( fileName );
 		if ( check.exists() ) {
-			logger.debug("done downloading " + fileName );
+			long size = check.length();
+			logger.debug("done downloading " + fileName + ": " + size + " bytes (GZIPPED)");
+			if ( size == 0 ) {
+				throw new Exception(fileName + " is empty. Check original file.");
+			}
 			if ( decompress ) {
 				decompress(fileName, to);
 				new File( fileName ).delete();

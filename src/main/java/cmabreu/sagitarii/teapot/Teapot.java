@@ -326,7 +326,7 @@ public class Teapot {
 				Downloader dl = new Downloader();
 				for ( FileUnity file : act.getFiles() ) {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
-					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId() + "&experiment=" + act.getExperiment();
+					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					dl.download(url, target, true);
 				}
@@ -371,6 +371,7 @@ public class Teapot {
 		xml = xml.replaceAll("><", ">\n<");
 		writer.write( xml );
 		writer.close();		
+		logger.debug("XML source data file saved");
 	}
 	
 	
