@@ -1,0 +1,19 @@
+#!/bin/bash
+# Teapot
+#
+# Sagitarii Teapot Node
+# By Carlos Magno Abreu - magno.mabreu@gmail.com
+
+case $1 in
+    start)
+        /bin/bash /etc/teapot/teapot-start.sh
+    ;;
+    stop)
+        /bin/bash /etc/teapot/teapot-stop.sh
+    ;;
+    restart)
+        /bin/bash /etc/teapot/teapot-stop.sh
+        /bin/bash /etc/teapot/teapot-start.sh
+    ;;
+esac
+exit 0

@@ -61,7 +61,8 @@ public class Communicator  {
 			webClient.doPost(targetAction, parameter, content);
 			resposta = "OK";
 		} catch ( Exception e ) {
-			logger.error("Communication error: " + e.getMessage() );
+			logger.error("post error:   " + e.getMessage() );
+			logger.error("error detail: " + parameter );
 		} 
 		return resposta;
 	}
@@ -78,9 +79,10 @@ public class Communicator  {
 	public String send( String targetAction, String parameters ) {
 		String resposta = "COMM_ERROR";
 		try { 
-			resposta = webClient.doGet(targetAction, parameters);
+			resposta = webClient.doGet(targetAction, parameters );
 		} catch ( Exception e ) {
-			logger.error("Communication error: " + e.getMessage() );
+			logger.error("get error:    " + e.getMessage() );
+			logger.error("error detail: " + parameters );
 		} 
 		return resposta;
 	}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+	Arquivo de configuração do Sagitarii Teapot v1.0
+	Por: Carlos Magno Abreu em 18/07/2014
+	
+ -->
+
+<!DOCTYPE configuration [
+	<!ELEMENT configuration (cluster,proxy) >
+	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,activationsMaxLimit,activationShowConsole,rPath,clearDataAfterFinish,
+		CSVDelimiter,storageHost,storagePort,fileSenderDelay, useSpeedEqualizer, enforceTaskLimitToCores)>
+	<!ELEMENT proxy (useProxy,proxy-host,proxy-port,proxy-password,proxy-user)>
+]>
+
+<configuration>
+	
+	<cluster>
+		<hostURL>http://192.168.1.20:8080/sagitarii/</hostURL>
+		<poolIntervalMilliSeconds>1000</poolIntervalMilliSeconds>
+		<activationsMaxLimit>50</activationsMaxLimit>
+		<activationShowConsole>false</activationShowConsole>
+		<rPath>C:/rJava/jri</rPath>
+		<clearDataAfterFinish>false</clearDataAfterFinish>
+		<CSVDelimiter>,</CSVDelimiter>
+		<storageHost>192.168.1.20</storageHost>
+		<storagePort>3333</storagePort>
+		<fileSenderDelay>200</fileSenderDelay>
+		<useSpeedEqualizer>true</useSpeedEqualizer>
+		<enforceTaskLimitToCores>false</enforceTaskLimitToCores>
+	</cluster>
+
+	<proxy>
+		<useProxy>0</useProxy>
+		<proxy-host>proxy_host</proxy-host>
+		<proxy-port>8080</proxy-port>
+		<proxy-password>password</proxy-password>
+		<proxy-user>user</proxy-user> 
+	</proxy>	
+	
+</configuration>

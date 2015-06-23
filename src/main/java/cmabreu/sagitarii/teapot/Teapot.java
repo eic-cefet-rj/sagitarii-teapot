@@ -1,23 +1,5 @@
 package cmabreu.sagitarii.teapot;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-
-import cmabreu.sagitarii.teapot.comm.Communicator;
-import cmabreu.sagitarii.teapot.comm.Downloader;
-import cmabreu.sagitarii.teapot.comm.FileUnity;
-import cmabreu.sagitarii.teapot.comm.Uploader;
-
 /**
  * Copyright 2015 Carlos Magno Abreu
  * magno.mabreu@gmail.com 
@@ -35,6 +17,24 @@ import cmabreu.sagitarii.teapot.comm.Uploader;
  * limitations under the License.
  * 
  */
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+
+import cmabreu.sagitarii.teapot.comm.Communicator;
+import cmabreu.sagitarii.teapot.comm.Downloader;
+import cmabreu.sagitarii.teapot.comm.FileUnity;
+import cmabreu.sagitarii.teapot.comm.Uploader;
 
 public class Teapot {
 	private SystemProperties tm;
@@ -328,6 +328,10 @@ public class Teapot {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
 					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
+					
+					sendErrorLog("Downloading file " + file.getName() );
+
+					
 					dl.download(url, target, true);
 				}
 			} else {
@@ -337,6 +341,7 @@ public class Teapot {
 		}
 		
 		logger.debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
+		sendErrorLog("");
 	}
 	
 	// Read a text file and save into a List
@@ -376,8 +381,8 @@ public class Teapot {
 	
 	
 	/**
-	 * É chamado de tempos em tempos para enviar os dados da máquina ao Sagitarii.
-	 * Ao fazer isso, o Sagitarii poderá enviar uma nova tarefa.
+	 * Eh chamado de tempos em tempos para enviar os dados da maquina ao Sagitarii.
+	 * Ao fazer isso, o Sagitarii poderah enviar uma nova tarefa.
 	 */
 	public void process( String response ) throws Exception {
 		logger.debug("process");

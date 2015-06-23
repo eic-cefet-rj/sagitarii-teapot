@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+	<appenders>
+		
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{dd/MM/YYYY HH:mm:ss} %-5level %logger{36} - %msg%n" />
+		</Console>
+		
+		<RandomAccessFile name="File" fileName="logs/teapot.log" append="false">
+			<PatternLayout pattern="%d{dd/MM/YYYY HH:mm:ss} %-5level %logger{36} - %msg%n" />
+		</RandomAccessFile>		
+		
+	</appenders>
+	
+	<loggers>
+	
+		<Logger name="cmabreu.sagitarii.teapot.comm.Client" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+		
+		<Logger name="cmabreu.sagitarii.teapot.RepositoryManager" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.Configurator" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+		
+		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+		
+		
+		
+		<Logger name="cmabreu.taskmanager.Task" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.taskmanager.core.TaskRunner" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+		
+		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.Main" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<root level="debug">
+			<appender-ref ref="File" />
+		</root>
+		
+	</loggers>
+	
+	
+</configuration>
