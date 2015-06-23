@@ -178,7 +178,7 @@ public class Main {
 				
 				for ( TaskRunner tr : getRunners() ) {
 					if ( tr.getCurrentTask() != null ) {
-						String time = tr.getStartTime() + " (" + tr.getTime() + "s)";
+						String time = tr.getStartTime() + " (" + tr.getTime() + ")";
 						logger.debug( " > " + tr.getCurrentTask().getTaskId() + " (" + tr.getCurrentTask().getActivation().getExecutor() + ") : " + time);
 					}
 				}
@@ -268,7 +268,7 @@ public class Main {
 				sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
 				sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
 				sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," ); 
-				sb.append( generateJsonPair( "elapsedTime" , String.valueOf( tr.getTime() ) ) );
+				sb.append( generateJsonPair( "elapsedTime" , tr.getTime() ) );
 				dataPrefix = ",";
 				sb.append("}");
 			}

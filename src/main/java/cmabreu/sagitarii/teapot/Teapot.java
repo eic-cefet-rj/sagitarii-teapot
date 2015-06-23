@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,7 +75,7 @@ public class Teapot {
 			try {
 				FileUtils.deleteDirectory( new File( task.getActivation().getNamespace() ) ); 
 			} catch ( IOException e ) {
-				sendErrorLog( e.getMessage() );
+				notifySagitarii( e.getMessage() );
 			}
 		}
 	}
@@ -94,29 +95,29 @@ public class Teapot {
 		try {
 			File file = new File(sagiOutput);
 			if( !file.exists() ) { 
-				sendErrorLog("output CSV data file sagi_output.txt not found");
+				notifySagitarii("output CSV data file sagi_output.txt not found");
 				return;
 			} 	
 			if ( file.length() == 0 ) { 
-				sendErrorLog("output CSV data file sagi_output.txt is empty");
+				notifySagitarii("output CSV data file sagi_output.txt is empty");
 				return;
 			}		
 			BufferedReader br = new BufferedReader( new FileReader( file ) );
 			String header = br.readLine(); 					
 			if ( header == null ) { 
-				sendErrorLog("output CSV data file sagi_output.txt have no header line");
+				notifySagitarii("output CSV data file sagi_output.txt have no header line");
 				br.close();
 				return;
 			}
 			String line = br.readLine(); 					
 			if ( line == null ) { 
-				sendErrorLog("output CSV data file sagi_output.txt have no data line");
+				notifySagitarii("output CSV data file sagi_output.txt have no data line");
 				br.close();
 				return;
 			}
 			br.close();
 		} catch ( Exception e ) {
-			sendErrorLog("validateProduct: " + e.getMessage() );
+			notifySagitarii("validateProduct: " + e.getMessage() );
 			return;
 		}
 		
@@ -128,10 +129,14 @@ public class Teapot {
 	}
 	
 	
-	public void sendErrorLog( String errorLog ) {
-		logger.error( errorLog );
-		String parameters = "macAddress=" + tm.getMacAddress() + "&errorLog=" + errorLog;
-		comm.send("receiveErrorLog", parameters);
+	public void notifySagitarii( String message ) {
+		logger.debug( message );
+		try {
+			String parameters = "macAddress=" + tm.getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
+			comm.send("receiveErrorLog", parameters);
+		} catch ( Exception e ) {
+			logger.error("cannot notify Sagitarii: " + e.getMessage() );
+		}
 	}
 	
 	/**
@@ -174,7 +179,7 @@ public class Teapot {
 					} catch ( Exception e ) {
 						logger.error( e.getMessage() );
 						comm.send("activityManagerReceiver", "instanceId=" + nextAct.getInstanceSerial() + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
-						sendErrorLog( e.getMessage() );
+						notifySagitarii( e.getMessage() );
 					}
 					return;
 				} else {
@@ -218,7 +223,7 @@ public class Teapot {
 	        notify( task );
 	        
 		} catch ( Exception e ) {
-			sendErrorLog("Sagitarii not received task RUNNING response. Maybe offline.");
+			notifySagitarii("Sagitarii not received task RUNNING response. Maybe offline.");
 		}
 	}
 	
@@ -248,7 +253,7 @@ public class Teapot {
 			sanitize( task );
 			
 		} catch ( Exception e ) {
-			sendErrorLog("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
+			notifySagitarii("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
 		}
 		
 	}
@@ -279,7 +284,7 @@ public class Teapot {
 		logger.debug("start data preparation for task " + act.getExecutor() + " (Activity: " + act.getActivitySerial() + "/ Task: " + act.getTaskId() + ")" );
 		if ( act.getSourceData().size() < 2 ) {
 			// We need at least 2 lines ( one line for header and one line of data )
-			sendErrorLog( "Not enough input data. Aborting..." );
+			notifySagitarii( "Not enough input data. Aborting..." );
 			throw new Exception ("Not enough data in input CSV for Task " + act.getActivitySerial() );
 		}
 		createWorkFolder(act);
@@ -329,8 +334,7 @@ public class Teapot {
 					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					
-					sendErrorLog("Downloading file " + file.getName() );
-
+					notifySagitarii("Downloading file " + file.getName() );
 					
 					dl.download(url, target, true);
 				}
@@ -340,8 +344,8 @@ public class Teapot {
 	
 		}
 		
+		notifySagitarii( "" );
 		logger.debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
-		sendErrorLog("");
 	}
 	
 	// Read a text file and save into a List
@@ -395,7 +399,7 @@ public class Teapot {
 
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
-					
+					notifySagitarii("starting executor " + act.getExecutor() );
 					logger.debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
@@ -411,7 +415,7 @@ public class Teapot {
 		} catch (Exception e) {
 			logger.error( e.getMessage() );
 			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
-			sendErrorLog( e.getMessage() );
+			notifySagitarii( e.getMessage() );
 		}
 	}
 

@@ -18,8 +18,10 @@ package cmabreu.sagitarii.teapot;
  * 
  */
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import cmabreu.sagitarii.teapot.comm.Communicator;
 
@@ -30,7 +32,7 @@ public class TaskRunner extends Thread {
 	private String response;
 	private boolean active = true;
 	private String startTime;  
-	private long startTimeNano;    
+	private long startTimeMillis;    
 
 	public String getStartTime() {
 		return startTime;
@@ -59,15 +61,29 @@ public class TaskRunner extends Thread {
 		setName("Teapot Task Runner");
 	}
 	
-	public double getTime() { 
-		double estimatedTime = ( System.nanoTime() - startTimeNano ) / 1000000000.0;
+	public String getTime() {
+		long millis = getTimeMillis(); 
+
+		String time = String.format("%03d %02d:%02d:%02d", 
+				TimeUnit.MILLISECONDS.toDays( millis ),
+				TimeUnit.MILLISECONDS.toHours( millis ),
+				TimeUnit.MILLISECONDS.toMinutes( millis ) -  
+				TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours( millis ) ), 
+				TimeUnit.MILLISECONDS.toSeconds( millis ) - 
+				TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes( millis ) ) );
+
+		return time;
+	}
+	
+	public long getTimeMillis() { 
+		long estimatedTime = ( Calendar.getInstance().getTimeInMillis() - startTimeMillis );
 		return estimatedTime;
 	}
 	
 	@Override
 	public void run() {
 		startTime = DateLibrary.getInstance().getHourTextHuman();
-		startTimeNano = System.nanoTime();
+		startTimeMillis = Calendar.getInstance().getTimeInMillis();
 		try {
 			logger.debug("[" + serial + "] runner thread start");
 			

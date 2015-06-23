@@ -44,7 +44,7 @@ public class Show implements CommandLine.ICommand {
 			System.out.println("Found " + Main.getRunners().size() + " running tasks:");
 			for ( TaskRunner taskRequester : Main.getRunners() ) {
 				if ( taskRequester.getCurrentTask() != null ) {
-					String time = taskRequester.getStartTime() + " (" + (long)taskRequester.getTime() + "s)";
+					String time = taskRequester.getStartTime() + " (" + taskRequester.getTime() + ")";
 					
 					String line = taskRequester.getCurrentTask().getActivation().getInstanceSerial() + " ";
 					
@@ -64,19 +64,12 @@ public class Show implements CommandLine.ICommand {
 			System.out.println("Found " + Main.getRunners().size() + " running tasks:");
 			for ( TaskRunner taskRequester : Main.getRunners() ) {
 				if ( taskRequester.getCurrentTask() != null ) {
-					String time = taskRequester.getStartTime() + " (" + (long)taskRequester.getTime() + "s)";
+					String time = taskRequester.getStartTime() + " (" + taskRequester.getTime() + ")";
 					System.out.println( " > " +  
 							taskRequester.getCurrentTask().getActivation().getExperiment() + 
 							"/" + taskRequester.getCurrentTask().getActivation().getActivitySerial() + 
 							" " + taskRequester.getCurrentTask().getTaskId() + " (" + 
 							taskRequester.getCurrentTask().getActivation().getExecutor() + ") : " + time);
-					/*
-					for ( Activation activation :  taskRequester.getJobPool() ) {
-						System.out.println("    > " + activation.getActivitySerial() + " " + activation.getTaskId() + " (" + 
-								activation.getExecutor() + ") " + activation.getStatus().toString() );
-					}
-					*/
-					
 				}
 			}
 		}
