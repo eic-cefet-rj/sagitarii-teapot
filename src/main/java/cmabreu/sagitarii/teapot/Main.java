@@ -62,7 +62,7 @@ public class Main {
 	}
 
 	/**
-	 * Remover o diretório raiz do namespace
+	 * Remover o diretorio raiz do namespace
 	 * Chamado antes de iniciar os trabalhos para sempre ter um namespace limpo.
 	 */
 	private static void cleanUp() {
@@ -93,7 +93,7 @@ public class Main {
 			
 			configurator = new Configurator("config.xml");
 			configurator.loadMainConfig();
-			RepositoryManager rm = new RepositoryManager();
+			RepositoryManager rm = new RepositoryManager( configurator );
 
 			logger.debug("Loading Task Manager ...");
 			
@@ -120,14 +120,14 @@ public class Main {
 			
 			logger.debug("Searching for wrappers...");
 			try {
-				rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
+				rm.downloadWrappers( );
 				wrappersDownloaded = true;
 			} catch ( ConnectException e ) {
 				logger.error("Cannot download wrappers. Will interrupt startup until Sagitarii is up.");
 			}
 
 			logger.debug("Staring communicator...");
-			communicator = new Communicator( configurator, configurator.getSystemProperties() );
+			communicator = new Communicator( configurator );
 			
 			
 			if ( wrappersDownloaded ) {
@@ -188,7 +188,7 @@ public class Main {
 				if ( !wrappersDownloaded ) {
 					try {
 						logger.debug("Searching for wrappers...");
-						rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
+						rm.downloadWrappers();
 						wrappersDownloaded = true;
 						logger.debug("Done. Teapot Started.");
 					} catch ( ConnectException e ) {
@@ -430,8 +430,8 @@ public class Main {
 		} else {
 			logger.debug("reload all wrappers now.");
 			try {
-				RepositoryManager rm = new RepositoryManager();
-				rm.downloadWrappers( configurator.getHostURL(), configurator.getSystemProperties().getOsType() );
+				RepositoryManager rm = new RepositoryManager( configurator );
+				rm.downloadWrappers();
 				logger.debug("all wrappers reloaded.");
 			} catch ( Exception e ) {
 				logger.error("cannot reload wrappers: " + e.getMessage() );

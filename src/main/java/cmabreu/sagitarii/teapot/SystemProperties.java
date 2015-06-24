@@ -18,6 +18,7 @@ package cmabreu.sagitarii.teapot;
  * 
  */
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -46,6 +47,7 @@ public class SystemProperties  {
     private String javaVersion;
     private long freeMemory;
     private long totalMemory;
+    private String teapotRootFolder;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 
     public OsType getOsType() {
@@ -106,7 +108,25 @@ public class SystemProperties  {
 		return freeMemory;
 	}
     
+    public String getTeapotRootFolder() {
+		return teapotRootFolder;
+	}
+    
     public SystemProperties() throws Exception {
+    	
+		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
+		String teapotRoot =  f.getAbsolutePath();
+
+		System.out.println("root folder is " + teapotRoot );
+
+		
+		teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( "/" ) + 1);
+		if ( teapotRootFolder == "" ) {
+			teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( "\\" ) + 1);
+		}
+    	
+		System.out.println("root folder is " + teapotRootFolder );
+		
     	getProcessCpuLoad();
     	logger.debug("processors...");
     	this.availableProcessors = Runtime.getRuntime().availableProcessors(); //  ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();

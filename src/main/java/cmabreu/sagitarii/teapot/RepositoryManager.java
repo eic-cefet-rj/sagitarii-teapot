@@ -25,30 +25,30 @@ import java.util.List;
 import cmabreu.sagitarii.teapot.comm.Downloader;
 
 public class RepositoryManager {
-	private String FOLDER_NAME;
+	private String folderName;
 	private String MANIFEST_FILE; 
 	private boolean hasFolder = false;
 	private Logger logger = LogManager.getLogger( this.getClass().getName()  );
+	private Configurator configurator;
 
-	public String getRepositoryFolder() {
-		return this.FOLDER_NAME;
-	}
-	
-	public RepositoryManager() {
-		this.FOLDER_NAME = ".";
-		this.MANIFEST_FILE = FOLDER_NAME + File.separator + "manifesto.xml";
+	public RepositoryManager( Configurator configurator ) {
+		this.configurator = configurator;
+		this.folderName = configurator.getSystemProperties().getTeapotRootFolder() + "/wrappers";
+		this.MANIFEST_FILE = folderName + "/" + "manifesto.xml";
 		this.hasFolder = createRepositoryFolder();
 	}
 
-	private void downloadActivity( String chironHost, String file ) throws Exception {
+	private void downloadActivity( String sagitariiHost, String file ) throws Exception {
 		Downloader dl = new Downloader();
-		dl.download( chironHost + "repository/" + file , FOLDER_NAME + "/" + file, false );
+		dl.download( sagitariiHost + "repository/" + file , folderName + "/" + file, false );
 	}
 	
-	public void downloadWrappers( String chironHost, OsType osType ) throws Exception  {
+	public void downloadWrappers(  ) throws Exception  {
+		String sagitariiHost = configurator.getHostURL();
+		OsType osType = configurator.getSystemProperties().getOsType();
 		if ( hasFolder ) {
 			try {
-				downloadManifest( chironHost + "getManifest" );
+				downloadManifest( sagitariiHost + "getManifest" );
 			} catch ( Exception e ) {
 				throw e;
 			}
@@ -67,11 +67,11 @@ public class RepositoryManager {
 				for ( Wrapper acc : act ) {
 					if ( ( acc.target.toUpperCase().equals( osType.toString() ) || acc.target.toUpperCase().equals("ANY") ) && !acc.type.equals("SELECT") ) {
 						logger.debug( "Check " + acc.fileName + " " + acc.version + " " + acc.target );
-						File theFile = new File( FOLDER_NAME + File.separator + acc.fileName );
+						File theFile = new File( folderName + File.separator + acc.fileName );
 						if ( ( !theFile.exists() ) || acc.reload  ) {
-							logger.debug("Downloading " + chironHost + acc.fileName + " " + acc.version + ". Wait...");
+							logger.debug("Downloading " + sagitariiHost + acc.fileName + " " + acc.version + ". Wait...");
 							try {
-								downloadActivity( chironHost, acc.fileName );
+								downloadActivity( sagitariiHost, acc.fileName );
 								logger.debug(acc.fileName + " ok.");
 							} catch ( Exception e ) {
 								logger.error(acc.fileName + " not found : " + e.getMessage() );
@@ -97,7 +97,7 @@ public class RepositoryManager {
 
 	private boolean createRepositoryFolder() {
 		boolean result = false;
-		File theDir = new File( FOLDER_NAME );
+		File theDir = new File( folderName );
 		if ( !theDir.exists() ) {
 			logger.debug("Creating repository folder.");
 			try{

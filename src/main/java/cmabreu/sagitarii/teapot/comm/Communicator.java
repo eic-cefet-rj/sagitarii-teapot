@@ -38,8 +38,8 @@ public class Communicator  {
 	private Logger logger = LogManager.getLogger( this.getClass().getName() );
 
 	
-	public Communicator( Configurator gf, SystemProperties tm ) throws Exception {
-		
+	public Communicator( Configurator gf) throws Exception {
+		SystemProperties tm = gf.getSystemProperties();
 		webClient = new WebClient(gf);
 		try {
 			this.soName = URLEncoder.encode(tm.getSoName(), "UTF-8");
