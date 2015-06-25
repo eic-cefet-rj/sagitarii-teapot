@@ -66,7 +66,7 @@ public class Downloader {
 		File check = new File( fileName );
 		if ( check.exists() ) {
 			long size = check.length();
-			logger.debug("done downloading " + fileName + ": " + size + " bytes (GZIPPED)");
+			logger.debug("done downloading " + fileName + ": " + size + " bytes");
 			if ( size == 0 ) {
 				throw new Exception(fileName + " is empty. Check original file.");
 			}

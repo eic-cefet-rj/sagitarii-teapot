@@ -33,7 +33,7 @@ public class RepositoryManager {
 
 	public RepositoryManager( Configurator configurator ) {
 		this.configurator = configurator;
-		this.folderName = configurator.getSystemProperties().getTeapotRootFolder() + "/wrappers";
+		this.folderName = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers";
 		this.MANIFEST_FILE = folderName + "/" + "manifesto.xml";
 		this.hasFolder = createRepositoryFolder();
 	}

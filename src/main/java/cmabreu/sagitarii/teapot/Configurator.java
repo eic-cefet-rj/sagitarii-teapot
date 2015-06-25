@@ -18,6 +18,8 @@ package cmabreu.sagitarii.teapot;
  * 
  */
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,13 +151,20 @@ public class Configurator {
 	
 	public Configurator(String file) throws Exception {
 		logger.debug("loading XML data from " + file);
+		
+		File fil = new File( file );
+		if ( !fil.exists() ) {
+			System.out.println("nao encontrado");
+		}
+		
 		try {
-			InputStream is = this.getClass().getClassLoader().getResourceAsStream(file);
+			InputStream is = new FileInputStream( file ); 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			doc = dBuilder.parse(is);
 			doc.getDocumentElement().normalize();
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error("XML file " + file + " not found.");
 		}	
 		systemProperties = new SystemProperties();

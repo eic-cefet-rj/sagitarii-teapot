@@ -116,20 +116,11 @@ public class SystemProperties  {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
 		String teapotRoot =  f.getAbsolutePath();
-
-		System.out.println("root folder is " + teapotRoot );
-
-		
-		teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( "/" ) + 1);
-		if ( teapotRootFolder == "" ) {
-			teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( "\\" ) + 1);
-		}
-    	
-		System.out.println("root folder is " + teapotRootFolder );
+		teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( File.separator ) + 1).replace("\\", "/");
 		
     	getProcessCpuLoad();
     	logger.debug("processors...");
-    	this.availableProcessors = Runtime.getRuntime().availableProcessors(); //  ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors();
+    	this.availableProcessors = Runtime.getRuntime().availableProcessors(); 
     	getFreeMemory(); 
     	getTotalMemory();  
     	logger.debug("SO name...");

@@ -88,7 +88,7 @@ public class Main {
 	    	System.out.println("Carlos Magno Abreu        magno.mabreu@gmail.com");
 			System.out.println("------------------------------------------------");
 			System.out.println("");
-
+			
 			logger.debug("Loading Repository Manager ...");
 			
 			configurator = new Configurator("config.xml");
