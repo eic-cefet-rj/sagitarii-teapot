@@ -28,8 +28,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import cmabreu.sagitarii.teapot.comm.Communicator;
-import cmabreu.sagitarii.teapot.comm.Downloader;
-import cmabreu.sagitarii.teapot.comm.Uploader;
 import cmabreu.sagitarii.teapot.console.CommandLoader;
 
 
@@ -145,37 +143,14 @@ public class Main {
 					LogManager.disableLoggers();
 				}
 				
-				if( args[0].equalsIgnoreCase("upload") )   {
-					if ( args.length != 5 ) {
-						System.out.println("Use teapot upload <file.csv> <target_table> <experiment_tag> <work_folder>");
-						System.exit(0);
-					}
-					String fileName = args[1];
-					String relationName = args[2];
-					String experimentSerial = args[3];
-					String folderName = args[4];
-
-					new Uploader(configurator).uploadCSV(fileName, relationName, experimentSerial, folderName, null, configurator.getSystemProperties() );
-					
-					System.exit(0);
-				}
-				
-				if ( args[0].equalsIgnoreCase("download") ) {
-					String fileId = args[1];
-					String saveTo = args[2];
-					String url = configurator.getHostURL() + "/getFile?idFile=" + fileId;
-					new Downloader().download(url, saveTo, true);
-					System.exit(0);
-				}
-
 			}
 			// =============================================================
 			// =============================================================
 			
 			while (true) {
 				clearRunners();
+
 				logger.debug( "init new cycle: " + runners.size() + " of " + configurator.getActivationsMaxLimit() + " tasks running:" );
-				
 				for ( TaskRunner tr : getRunners() ) {
 					if ( tr.getCurrentTask() != null ) {
 						String time = tr.getStartTime() + " (" + tr.getTime() + ")";
@@ -210,7 +185,7 @@ public class Main {
 									} else {
 										if ( preProcess( response ) ) {
 											logger.debug("starting new process");
-											TaskRunner tr = new TaskRunner(response, communicator, configurator.getSystemProperties(), configurator);
+											TaskRunner tr = new TaskRunner( response, communicator, configurator);
 											runners.add(tr);
 											tr.start();
 											totalInstancesProcessed++;
@@ -267,7 +242,7 @@ public class Main {
 				sb.append( generateJsonPair( "experiment" , tr.getCurrentTask().getActivation().getExperiment() ) + "," );
 				sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
 				sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
-				sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," ); 
+				sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," );
 				sb.append( generateJsonPair( "elapsedTime" , tr.getTime() ) );
 				dataPrefix = ",";
 				sb.append("}");
@@ -277,6 +252,9 @@ public class Main {
 		StringBuilder data = new StringBuilder();
 		data.append("{");
 		data.append( generateJsonPair( "nodeId" , configurator.getSystemProperties().getMacAddress() ) + "," );
+		data.append( generateJsonPair( "cpuLoad" , String.valueOf( configurator.getSystemProperties().getCpuLoad() ) ) + "," );
+		data.append( generateJsonPair( "freeMemory" , String.valueOf( configurator.getSystemProperties().getFreeMemory() ) ) + "," );
+		data.append( generateJsonPair( "totalMemory" , String.valueOf( configurator.getSystemProperties().getTotalMemory() ) ) + "," );
 		data.append( addArray("data", sb.toString() ) ); 
 		data.append("}");			
 		
@@ -315,29 +293,29 @@ public class Main {
 		
 		if ( ( !response.equals( "NO_ANSWER" ) ) && ( !response.equals( "COMM_ERROR" ) ) && ( !response.equals( "" ) ) ) {
 			if ( response.equals( "COMM_RESTART" ) ) {
-				logger.debug("get restart command from Sagitarii");
+				logger.warn("get restart command from Sagitarii");
 				restart();
 			} else
 			if ( response.equals( "RELOAD_WRAPPERS" ) ) {
-				logger.debug("get reload wrappers command from Sagitarii");
+				logger.warn("get reload wrappers command from Sagitarii");
 				reloadWrappers();
 			} else
 			if ( response.equals( "COMM_QUIT" ) ) {
-				logger.debug("get quit command from Sagitarii");
+				logger.warn("get quit command from Sagitarii");
 				quit();
 			} else
 				if ( response.contains( "INFORM" ) ) {
 					String[] data = response.split("#");
-					logger.debug("Sagitarii is asking for Instance " + data[1] );
+					logger.warn("Sagitarii is asking for Instance " + data[1] );
 					inform( data[1] );
 				} else
 			if ( response.equals( "COMM_CLEAN_WORKSPACE" ) ) {
-				logger.debug("get clean workspace command from Sagitarii");
+				logger.warn("get clean workspace command from Sagitarii");
 				if (  getRunners().size() > 0 ) {
-					logger.debug("will not clean workspace. " + getRunners().size() + " tasks still runnig");
+					logger.warn("will not clean workspace. " + getRunners().size() + " tasks still runnig");
 				} else {
 					cleanUp();
-					logger.debug("workspace cleaned");
+					logger.warn("workspace cleaned");
 				}
 			} 
 		}
@@ -396,6 +374,7 @@ public class Main {
 				}
 			}
 		}
+		// TODO: Report to Sagitarii !!
 		if ( found ) {
 			logger.debug("Instance "+instanceSerial+" is running");
 		} else {
