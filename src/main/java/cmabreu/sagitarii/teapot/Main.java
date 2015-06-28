@@ -75,8 +75,7 @@ public class Main {
 	 * Teapot entry point
 	 * 
 	 * EX UNITATE VIRES !
-	 * 
-	 * @param args parameters
+
 	 */
 	public static void main( String[] args ) {
 		boolean wrappersDownloaded = false;
@@ -267,8 +266,6 @@ public class Main {
 	/**
 	 * Will check if Sagitarii sent a special command to this node
 	 * 
-	 * @param response Sagitarii response
-	 * @return if can process XML file or not
 	 */
 	private static boolean preProcess( String response ) {
 		logger.debug("checking preprocess");

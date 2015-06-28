@@ -123,8 +123,6 @@ public class Client {
 	
 	/**
 	 * Compress a file
-	 * @param source_filepath source
-	 * @param destinaton_zip_filepath target
 	 */
 	public void compress(String source_filepath, String destinaton_zip_filepath) {
 		logger.debug("compressing file ...");

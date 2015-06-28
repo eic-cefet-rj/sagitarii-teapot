@@ -41,7 +41,6 @@ public class CommandLine {
 	/**
 	 * A simple interface to enforce how the
 	 * command classes are executed.
-	 * @author medined
 	 */
 	public interface ICommand {
 		public boolean doIt(List<String> v);
@@ -100,8 +99,6 @@ public class CommandLine {
 	 * and the class to invoke. Notice that the command
 	 * is trimmed and converted to upper-case.
 	 * 
-	 * @param cmd The command token to assign to clazz.
-	 * @param clazz The java class that implements the command.
 	 */
 	public void assignClassToCommnd(String cmd, String clazz) {
 		cmdToClass.put(cmd.trim().toUpperCase(), clazz);	
@@ -136,7 +133,6 @@ public class CommandLine {
 
 	/**
 	 * Getter for commandLineHeader variable.
-	 * @return the command line header.
 	 */
 	public String getCommandLineHeader() {
 		return commandLineHeader;
@@ -144,7 +140,6 @@ public class CommandLine {
 
 	/**
 	 * Getter for commandLineHelp variable.
-	 * @return the command line help.
 	 */
 	public String getCommandLineHelp() {
 		return commandLineHelp;
@@ -152,7 +147,6 @@ public class CommandLine {
 
 	/**
 	 * Getter for commandLinePrompt variable.
-	 * @return the command line prompt.
 	 */
 	public String getCommandLinePrompt() {
 		return commandLinePrompt;
@@ -160,7 +154,6 @@ public class CommandLine {
 
 	/**
 	 * Getter for commandLineVersion variable.
-	 * @return the command line version.
 	 */
 	public String getCommandLineVersion() {
 		return commandLineVersion;
@@ -187,7 +180,6 @@ public class CommandLine {
 	 * Parses the input stream into tokens. Note that
 	 * quotes are needed when command-line parameters 
 	 * have spaces.
-	 * @param st The tokenizer object to use.
 	 */
 	public void parseStream(StreamTokenizer st) {
 		List v = new ArrayList<String>();
@@ -270,9 +262,6 @@ public class CommandLine {
 	 * Otherwise, the command is looked up in the cmdToClass
 	 * hashmap so that its equivalent java class is found. 
 	 * Then the class is executed using reflection.
-	 * @param v The command line broken into tokens. Including the
-	 * 		initial command token.
-	 * @return The value returned from the executed doIt() method.
 	 */
 	private boolean processCommands(List<String> v) {
 		long tickStart = System.currentTimeMillis();
@@ -320,9 +309,6 @@ public class CommandLine {
 	 * This method hides the ugly details of reflection. In
 	 * a nutshell it invokes the doIt() method of the
 	 * java class associated with the command being executed.
-	 * @param theName The name of the class to execute.
-	 * @param v The command line parses into tokens.
-	 * @return The return value of the doIt() method.
 	 */
 	public boolean runMethod( String theName, List v ) {
 		// get the class object.
@@ -411,28 +397,24 @@ public class CommandLine {
 	}
 
 	/** Setter for the commandLineHeader variable
-	 * @param string The command line header.
 	 */
 	public void setCommandLineHeader(String string) {
 		commandLineHeader = string;
 	}
 
 	/** Setter for the commandLineHelp variable
-	 * @param string The command line help.
 	 */
 	public void setCommandLineHelp(String string) {
 		commandLineHelp = string;
 	}
 
 	/** Setter for the commandLinePrompt variable
-	 * @param string The prompt.
 	 */
 	public void setCommandLinePrompt(String string) {
-		commandLinePrompt = string;
+		commandLinePrompt = string; 
 	}
 
 	/** Setter for the commandLineVersion variable
-	 * @param string The version.
 	 */
 	public void setCommandLineVersion(String string) {
 		commandLineVersion = string;
@@ -440,7 +422,6 @@ public class CommandLine {
 
 	/**
 	 * Sets the isInteractive status.
-	 * @param isInteractive The isInteractive to set
 	 */
 	public void setIsInteractive(boolean isInteractive) {
 		this.isInteractive = isInteractive;

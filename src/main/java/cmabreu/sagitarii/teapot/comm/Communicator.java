@@ -70,10 +70,6 @@ public class Communicator  {
 	* Send a GET request to Sagitarii
 	* 
 	* Exemple : targetAction = "myStrutsAction", parameters = "name=foo&sobrenome=Bar"
-	*
-	* @param  targetAction  a Struts2 action
-	* @param  parameters the GET request URL 
-	* @return Sagitarii response
 	*/
 	public String send( String targetAction, String parameters ) {
 		String resposta = "COMM_ERROR";
@@ -89,9 +85,6 @@ public class Communicator  {
 	/**
 	* Announce this node and request for more tasks do process
 	* Sagitarii can send a special command instead (quit, restart, reload wrappers, etc...)
-	* 
-	* @param  cpuLoad (in %)
-	* @return Sagitarii response
 	*/
 	public synchronized String announceAndRequestTask( Double cpuLoad, Long freeMemory, Long totalMemory ) {
 		String parameters = "soName=" + soName + "&localIpAddress=" + localIpAddress + 

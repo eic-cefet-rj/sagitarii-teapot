@@ -83,8 +83,6 @@ public class Teapot {
 	/**
 	 * Check if sagi_output have some data
 	 * 
-	 * @param sagiOutput the complete path to sagi_output.txt
-	 * @return true if the file have some data
 	 */
 	private void validateProduct( String taskFolder ) {
 		String sagiOutput = taskFolder + "/" + "sagi_output.txt";
@@ -195,8 +193,6 @@ public class Teapot {
 	/**
 	 * Run a wrapper task
 	 * BLOCKING
-	 * 
-	 * @param activation an activation
 	 */
 	private void runTask( Activation activation ) {
 		String applicationName = activation.getCommand();
@@ -229,10 +225,10 @@ public class Teapot {
 	
 	/**
 	* Implementacao de ITaskObserver.notify()
-	* Recebe uma noficacao quando uma tarefa é concluída.
-	* Este método é propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
+	* Recebe uma noficacao quando uma tarefa nao concluida.
+	* Este metodo eh propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
 	* que dispara ITaskObserver.notify() caso tenha sido chamado ITaskObserver.setObserver com um 
-	* observer válido (neste caso, o observer é esta classe).
+	* observer valido (neste caso, o observer eh esta classe).
 	*/
 	public synchronized void notify( Task task ) {
 		logger.debug("task " + task.getTaskId() + "("+ task.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
@@ -261,10 +257,8 @@ public class Teapot {
 
 	/**
 	 * Cria a pasta para os dados de trabalho da tarefa e caixas de
-	 * entrada e saída para os arquivos.
+	 * entrada e saida para os arquivos.
 	 * 
-	 * @param act
-	 * @throws Exception
 	 */
 	private void createWorkFolder( Activation act ) throws Exception {
 		File outputFolder = new File( act.getNamespace() + "/" + "outbox" );
@@ -276,9 +270,6 @@ public class Teapot {
 	
 	/** 
 	 * Salva os dados iniciais em uma pasta para trabalho.
-	 * 
-	 * @param act 
-	 * @throws Exception
 	 */
 	private void saveInputData( Activation act ) throws Exception {
 		logger.debug("start data preparation for task " + act.getExecutor() + " (Activity: " + act.getActivitySerial() + "/ Task: " + act.getTaskId() + ")" );
@@ -331,11 +322,8 @@ public class Teapot {
 				Downloader dl = new Downloader();
 				for ( FileUnity file : act.getFiles() ) {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
-					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId();
+					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + gf.getSystemProperties().getMacAddress();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
-					
-					notifySagitarii("Downloading file " + file.getName() );
-					
 					dl.download(url, target, true);
 				}
 			} else {
@@ -343,8 +331,6 @@ public class Teapot {
 			}
 	
 		}
-		
-		notifySagitarii( "" );
 		logger.debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
 	}
 	

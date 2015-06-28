@@ -36,8 +36,6 @@ public class Downloader {
 	/**
 	 * Faz o download de um arquivo do servidor.
 	 * 
-	 * @param from URL do arquivo
-	 * @param to pasta para salvar o arquivo apos o download.
 	 */
 	public void download( String from, String to, boolean decompress ) throws Exception {
 		String fileName = to;

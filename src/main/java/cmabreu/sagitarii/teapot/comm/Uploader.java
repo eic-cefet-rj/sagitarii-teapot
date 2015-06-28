@@ -17,8 +17,6 @@ package cmabreu.sagitarii.teapot.comm;
  * 
  */
 
-import java.io.IOException;
-
 import cmabreu.sagitarii.teapot.Configurator;
 import cmabreu.sagitarii.teapot.LogManager;
 import cmabreu.sagitarii.teapot.Logger;
@@ -35,11 +33,6 @@ public class Uploader {
 	
 	/**
 	 * Envia um arquivo CSV ao servidor
-	 * @param fileName nome e caminho do arquivo CSV
-	 * @param relationName noma da tabela que irá receber o arquivo (já deverá existir)
-	 * @param experimentSerial tag do experimento associado a estes dados (já deverá existir)
-	 * 
-	 * @throws IOException
 	 */
 	public void uploadCSV(String fileName, String relationName, String experimentSerial, 
 			String filesFolderName, Task task, SystemProperties tm) throws Exception {
