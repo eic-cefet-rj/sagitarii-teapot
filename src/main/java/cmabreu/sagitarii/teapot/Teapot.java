@@ -147,6 +147,8 @@ public class Teapot {
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
 			String rpath = gf.getrPath();
 			command = "java -Djava.library.path="+rpath+" -jar r-wrapper.jar " + activation.getCommand() + " " + activation.getNamespace();
+		} else if ( activation.getExecutorType().equals("BASH") ) {
+			// Run bash comand
 		} else {
 			command = "java -jar " + activation.getCommand() + " " + activation.getNamespace();
 		}
@@ -324,8 +326,12 @@ public class Teapot {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
 					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + gf.getSystemProperties().getMacAddress();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
+					
+					notifySagitarii("downloading " + file.getName() );
+					
 					dl.download(url, target, true);
 				}
+				notifySagitarii("");
 			} else {
 				logger.debug("no need to download files.");
 			}
