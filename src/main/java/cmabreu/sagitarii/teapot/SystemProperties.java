@@ -49,6 +49,10 @@ public class SystemProperties  {
     private long totalMemory;
     private String teapotRootFolder;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
+	
+	private String classPath;
+	private String rHome;
+	private String jriPath;
 
     public OsType getOsType() {
     	return this.osType;
@@ -118,6 +122,14 @@ public class SystemProperties  {
 		String teapotRoot =  f.getAbsolutePath();
 		teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( File.separator ) + 1).replace("\\", "/");
 		
+		try {	
+			classPath = System.getenv("CLASSPATH");
+			rHome = System.getenv("R_HOME");
+			jriPath = System.getenv("LD_LIBRARY_PATH");
+		} catch ( Exception e ) {
+			
+		}
+
     	getProcessCpuLoad();
     	logger.debug("processors...");
     	this.availableProcessors = Runtime.getRuntime().availableProcessors(); 
@@ -188,5 +200,17 @@ public class SystemProperties  {
     public String getSoName() {
     	return this.soName;
     }
+    
+    public String getrHome() {
+		return rHome;
+	}
+    
+    public String getClassPath() {
+		return classPath;
+	}
+    
+    public String getJriPath() {
+		return jriPath;
+	}
 	
 }

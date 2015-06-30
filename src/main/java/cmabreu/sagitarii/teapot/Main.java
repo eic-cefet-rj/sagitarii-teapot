@@ -105,6 +105,10 @@ public class Main {
 
 			logger.debug("R Processor location: " + configurator.getrPath());
 
+			logger.debug("Classpath: " + configurator.getSystemProperties().getClassPath() );
+			logger.debug("R Home (env): " + configurator.getSystemProperties().getrHome() );
+			logger.debug("JRI Library: " + configurator.getSystemProperties().getJriPath() );
+			
 			logger.debug("cleaning workspace...");
 			cleanUp();
 			

@@ -154,7 +154,9 @@ public class Configurator {
 		
 		File fil = new File( file );
 		if ( !fil.exists() ) {
-			System.out.println("nao encontrado");
+			System.out.println("xml config file not found at folder");
+			System.out.println( file );
+			System.exit(0);
 		}
 		
 		try {
