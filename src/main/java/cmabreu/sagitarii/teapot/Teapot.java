@@ -40,7 +40,7 @@ import cmabreu.sagitarii.teapot.comm.Uploader;
 public class Teapot {
 	private SystemProperties tm;
 	private Communicator comm;
-	private Configurator gf;
+	private Configurator configurator;
 	private XMLParser parser;
 	private List<Activation> executionQueue;
 	private List<Activation> jobPool;
@@ -63,7 +63,7 @@ public class Teapot {
 	public Teapot(SystemProperties tm, Communicator comm, Configurator gf) {
 		this.tm = tm;
 		this.comm = comm;
-		this.gf = gf;
+		this.configurator = gf;
 		this.parser = new XMLParser();
 		this.executionQueue = new ArrayList<Activation>();
 		this.jobPool = new ArrayList<Activation>();
@@ -71,7 +71,7 @@ public class Teapot {
 	
 
 	private void sanitize( Task task ) {
-		if ( gf.getClearDataAfterFinish() ) {
+		if ( configurator.getClearDataAfterFinish() ) {
 			try {
 				FileUtils.deleteDirectory( new File( task.getActivation().getNamespace() ) ); 
 			} catch ( IOException e ) {
@@ -140,17 +140,20 @@ public class Teapot {
 	/**
 	 * Formata o comando da ativacao seguinte usando o resultado CSV da ativacao anterior
 	 * 
-	 * @return o comando da ativacao após a substituicao das tags
+	 * @return o comando da ativacao apos a substituicao das tags
 	 */
 	private String generateCommand( Activation activation ) {
+		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
-			String rpath = gf.getrPath();
-			command = "java -Djava.library.path="+rpath+" -jar r-wrapper.jar " + activation.getCommand() + " " + activation.getNamespace();
+			command = wrapperFolder +  activation.getCommand();
+			//String rpath = gf.getrPath();
+			//command = "java -Djava.library.path="+rpath+" -jar r-wrapper.jar " + activation.getCommand() + " " + activation.getNamespace();
 		} else if ( activation.getExecutorType().equals("BASH") ) {
 			// Run bash comand
+			command = wrapperFolder + activation.getCommand();
 		} else {
-			command = "java -jar " + activation.getCommand() + " " + activation.getNamespace();
+			command = "java -jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
 		}
 		return command;
 	}
@@ -242,7 +245,7 @@ public class Teapot {
 			validateProduct( act.getNamespace() );
 
 			// Send data and files
-			new Uploader(gf).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
+			new Uploader(configurator).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
 					act.getNamespace() , task, tm );
 			
 			// Run next task in same instance (if exists)
@@ -324,7 +327,7 @@ public class Teapot {
 				Downloader dl = new Downloader();
 				for ( FileUnity file : act.getFiles() ) {
 					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
-					String url = gf.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + gf.getSystemProperties().getMacAddress();
+					String url = configurator.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + configurator.getSystemProperties().getMacAddress();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					
 					notifySagitarii("downloading " + file.getName() );

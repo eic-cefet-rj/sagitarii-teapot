@@ -48,6 +48,8 @@ public class SystemProperties  {
     private long freeMemory;
     private long totalMemory;
     private String teapotRootFolder;
+    private String teapotJarPath;
+    
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 	
 	private String classPath;
@@ -116,11 +118,15 @@ public class SystemProperties  {
 		return teapotRootFolder;
 	}
     
+    public String getTeapotJarPath() {
+		return teapotJarPath;
+	}
+    
     public SystemProperties() throws Exception {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
-		String teapotRoot =  f.getAbsolutePath();
-		teapotRootFolder = teapotRoot.substring(0, teapotRoot.lastIndexOf( File.separator ) + 1).replace("\\", "/");
+		teapotJarPath =  f.getAbsolutePath();
+		teapotRootFolder = teapotJarPath.substring(0, teapotJarPath.lastIndexOf( File.separator ) + 1).replace("\\", "/");
 		
 		try {	
 			classPath = System.getenv("CLASSPATH");
@@ -131,18 +137,14 @@ public class SystemProperties  {
 		}
 
     	getProcessCpuLoad();
-    	logger.debug("processors...");
     	this.availableProcessors = Runtime.getRuntime().availableProcessors(); 
     	getFreeMemory(); 
     	getTotalMemory();  
-    	logger.debug("SO name...");
     	this.soName = ManagementFactory.getOperatingSystemMXBean().getName();
     	this.localIpAddress = "***";
-    	logger.debug("java version...");
     	this.javaVersion = System.getProperty("java.version");
     	getProcessCpuLoad();
     	InetAddress ip;
-    	logger.debug("MAC address...");
 		try {
 			ip = getFirstNonLoopbackAddress(true, false);
 			this.localIpAddress = ip.toString().replace("/", "");
@@ -157,12 +159,10 @@ public class SystemProperties  {
 			for (int i = 0; i < mac.length; i++) {
 				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
 			}
-			//this.macAddress =  sb.toString() + "-" + generateSerial();    	
 			this.macAddress =  sb.toString();    	
 		} catch ( SocketException | UnknownHostException e) {
 		}
     	getProcessCpuLoad();
-    	logger.debug("OS type...");
     	discoverOsType();
 	}
 

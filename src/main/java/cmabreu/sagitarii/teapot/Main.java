@@ -94,20 +94,18 @@ public class Main {
 
 			logger.debug("Loading Task Manager ...");
 			
-			logger.debug("Available processors: " + configurator.getSystemProperties().getAvailableProcessors() + " cores." );
-			logger.debug("SO name / machine: " + configurator.getSystemProperties().getSoName() + " / " + configurator.getSystemProperties().getMachineName() );
-			logger.debug("SO family: " + configurator.getSystemProperties().getOsType() );
-			logger.debug("IP/MAC: " +  configurator.getSystemProperties().getLocalIpAddress() + " / " + configurator.getSystemProperties().getMacAddress() );
-			logger.debug("Java version " + configurator.getSystemProperties().getJavaVersion() );
-			
-			logger.debug("Announce interval: " + configurator.getPoolIntervalMilliSeconds() +"ms." );
-			logger.debug("Sagitarii URL: " + configurator.getHostURL() );
-
-			logger.debug("R Processor location: " + configurator.getrPath());
-
-			logger.debug("Classpath: " + configurator.getSystemProperties().getClassPath() );
-			logger.debug("R Home (env): " + configurator.getSystemProperties().getrHome() );
-			logger.debug("JRI Library: " + configurator.getSystemProperties().getJriPath() );
+			logger.debug("Cores     : " + configurator.getSystemProperties().getAvailableProcessors() + " cores." );
+			logger.debug("SO Name   : " + configurator.getSystemProperties().getSoName() );
+			logger.debug("Machine   : " + configurator.getSystemProperties().getMachineName() );
+			logger.debug("SO family : " + configurator.getSystemProperties().getOsType() );
+			logger.debug("IP/MAC    : " +  configurator.getSystemProperties().getLocalIpAddress() + " / " + configurator.getSystemProperties().getMacAddress() );
+			logger.debug("Java      : " + configurator.getSystemProperties().getJavaVersion() );
+			logger.debug("Announce  : " + configurator.getPoolIntervalMilliSeconds() +"ms." );
+			logger.debug("Sagitarii : " + configurator.getHostURL() );
+			logger.debug("Classpath : " + configurator.getSystemProperties().getClassPath() );
+			logger.debug("R Home    : " + configurator.getSystemProperties().getrHome() );
+			logger.debug("JRI       : " + configurator.getSystemProperties().getJriPath() );
+			logger.debug("Path      : " + System.getProperty( "java.library.path") );
 			
 			logger.debug("cleaning workspace...");
 			cleanUp();
@@ -118,7 +116,7 @@ public class Main {
 			if ( !configurator.getShowConsole() ) {
 				logger.debug("No activations console.");
 			}
-			
+
 			logger.debug("Searching for wrappers...");
 			try {
 				rm.downloadWrappers( );

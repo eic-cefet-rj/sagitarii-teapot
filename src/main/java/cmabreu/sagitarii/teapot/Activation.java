@@ -42,7 +42,6 @@ public class Activation implements Comparable<Activation> {
 	private String executorType;
 	private String targetTable;
 	private List<FileUnity> files;
-	private int instanceId;
 	private TaskStatus status = TaskStatus.QUEUED;
 	
 	public TaskStatus getStatus() {
@@ -203,10 +202,5 @@ public class Activation implements Comparable<Activation> {
 	public void setTargetTable(String targetTable) {
 		this.targetTable = targetTable;
 	}
-
-	public void setInstanceId(int instanceId) {
-		this.instanceId = instanceId;
-	}
-
 	
 }

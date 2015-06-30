@@ -43,7 +43,6 @@ public class Configurator {
 	private int useProxy;
 	private Document doc;
 	private boolean showConsole;
-	private String rPath;
 	private boolean clearDataAfterFinish;
 	private char CSVDelimiter; 
 	private int fileSenderDelay;
@@ -94,10 +93,6 @@ public class Configurator {
 		return useSpeedEqualizer;
 	}
 	
-	public String getrPath() {
-		return rPath;
-	}
-
 	public boolean getShowConsole() {
 		return this.showConsole;
 	}
@@ -208,7 +203,6 @@ public class Configurator {
 			Element mpElement = (Element) mpconfig;
 			try {
 				hostURL = getTagValue("hostURL", mpElement);
-				rPath = getTagValue("rPath", mpElement);
 				CSVDelimiter = getTagValue("CSVDelimiter", mpElement).charAt(0);
 				poolIntervalMilliSeconds = Integer.valueOf( getTagValue("poolIntervalMilliSeconds", mpElement) );
 				activationsMaxLimit = Integer.valueOf( getTagValue("activationsMaxLimit", mpElement) );

@@ -14,51 +14,59 @@
 	
 	<loggers>
 	
-		<Logger name="cmabreu.sagitarii.teapot.comm.Client" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.executors.RExecutor" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.SpeedEqualizer" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.executors.BashExecutor" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.TaskRunner" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.comm.Client" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.SpeedEqualizer" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.TaskRunner" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.RepositoryManager" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.RepositoryManager" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Configurator" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.Configurator" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 		
 		<Logger name="cmabreu.taskmanager.core.Task" level="debug" additivity="false"> 
-			<appender-ref ref="Console"/> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Main" level="error" additivity="false"> 
-			<appender-ref ref="Console"/> 
+		<Logger name="cmabreu.sagitarii.teapot.Main" level="debug" additivity="false"> 
+			<appender-ref ref="File"/> 
 		</Logger>
 
-		<root level="error">
+		<root level="debug">
 			<appender-ref ref="File" />
 		</root>
 		
