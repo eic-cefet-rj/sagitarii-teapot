@@ -13,7 +13,7 @@ public class TextConsole implements RMainLoopCallbacks {
 	}
 	
     public void rWriteConsole(Rengine re, String text, int oType) {
-    	console.add( text );
+    	//console.add( "[" + oType + "] " + text );
     }
     
     public void rBusy(Rengine re, int which) {

@@ -19,21 +19,23 @@ public class RExecutor implements IExecutor {
 	}
 	
 	@Override
-	public int run(String rScript, String workFolder) {
+	public int execute(String rScript, String workFolder) {
 		console = new ArrayList<String>();
-        console.add("running R Engine...");
-		int result = 0;
+        console.add("running R Engine for script " + rScript);
+        logger.debug("running R Engine for script " + rScript );
+        
 		try {
 			Rengine rengine = new Rengine(new String [] {"--vanilla"}, false, new TextConsole( console ) );
 	        if ( !rengine.waitForR() ) {
 	            console.add("Cannot load R");
-	            System.exit(1);
+	            logger.error("Cannot load R");
+	            return 1;
 	        }
-	        XX
+	        
 	        rengine.eval("sagitariiWorkFolder <- \""+ workFolder +"\"");
 	        rengine.eval( "source( '" + rScript + "') " );
-	
 	        REXP message = rengine.eval("messageToSagitarii");
+	        
 	        if ( message != null ) {
 	        	console.add( message.toString() );
 	        }
@@ -41,11 +43,12 @@ public class RExecutor implements IExecutor {
 	        rengine.end();
 
 		} catch ( Exception e ) {
-			result = 1;
+	        console.add("finished with error " + e.getMessage() );
+            return 1;
 		}
         console.add("done.");
         
-        return result;
+        return 0;
 	}
 
 }

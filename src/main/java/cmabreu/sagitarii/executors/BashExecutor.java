@@ -13,7 +13,7 @@ public class BashExecutor implements IExecutor {
 	}
 	
 	@Override
-	public int run(String rScript, String workFolder) {
+	public int execute(String rScript, String workFolder) {
 		console = new ArrayList<String>();
 		
 		console.add("will start " + rScript);

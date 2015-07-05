@@ -27,8 +27,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import cmabreu.sagitarii.executors.RExecutor;
 import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.console.CommandLoader;
+import cmabreu.sagitarii.teapot.console.commands.CheckREngine;
 
 
 public class Main {
@@ -78,6 +80,7 @@ public class Main {
 
 	 */
 	public static void main( String[] args ) {
+		
 		boolean wrappersDownloaded = false;
 		try {
 			System.out.println("");
@@ -105,7 +108,23 @@ public class Main {
 			logger.debug("Classpath : " + configurator.getSystemProperties().getClassPath() );
 			logger.debug("R Home    : " + configurator.getSystemProperties().getrHome() );
 			logger.debug("JRI       : " + configurator.getSystemProperties().getJriPath() );
-			logger.debug("Path      : " + System.getProperty( "java.library.path") );
+			logger.debug("Path      : " + configurator.getSystemProperties().getPath() );
+
+
+			/*
+			System.out.println("Teste 2");
+			RExecutor exec = new RExecutor();
+			exec.execute( "test.R", "/home/magno/" );
+			
+			for ( String s : exec.getConsole() ) {
+				System.out.println( s );
+			}
+			
+			System.exit(0);			
+			*/
+			
+			
+			
 			
 			logger.debug("cleaning workspace...");
 			cleanUp();

@@ -20,12 +20,14 @@ package cmabreu.sagitarii.teapot;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import javax.management.Attribute;
@@ -49,9 +51,7 @@ public class SystemProperties  {
     private long totalMemory;
     private String teapotRootFolder;
     private String teapotJarPath;
-    
-	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
-	
+    private String path;
 	private String classPath;
 	private String rHome;
 	private String jriPath;
@@ -122,6 +122,30 @@ public class SystemProperties  {
 		return teapotJarPath;
 	}
     
+    public String getPath() {
+		return path;
+	}
+    
+    private void addLibraryPath(String pathToAdd) throws Exception{
+        final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+        usrPathsField.setAccessible(true);
+
+        //get array of paths
+        final String[] paths = (String[])usrPathsField.get(null);
+
+        //check if the path to add is already present
+        for(String path : paths) {
+            if(path.equals(pathToAdd)) {
+                return;
+            }
+        }
+
+        //add the new path
+        final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+        newPaths[newPaths.length-1] = pathToAdd;
+        usrPathsField.set(null, newPaths);
+    }
+    
     public SystemProperties() throws Exception {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
@@ -135,8 +159,16 @@ public class SystemProperties  {
 		} catch ( Exception e ) {
 			
 		}
+		
+		if ( ( jriPath == null ) || jriPath.equals("") ) {
+			jriPath = "/usr/local/lib/R/site-library/rJava/jri/";
+			addLibraryPath( jriPath );
+		}
 
-    	getProcessCpuLoad();
+		
+		path = System.getProperty( "java.library.path");
+
+		getProcessCpuLoad();
     	this.availableProcessors = Runtime.getRuntime().availableProcessors(); 
     	getFreeMemory(); 
     	getTotalMemory();  

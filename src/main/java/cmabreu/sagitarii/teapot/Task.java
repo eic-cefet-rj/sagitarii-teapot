@@ -85,7 +85,7 @@ public class Task {
 				
 				CheckREngine re = new CheckREngine();
 				re.doIt( null );
-				XX
+				
 				//RExecutor ex = new RExecutor();
 				//exitCode = ex.run( activation.getCommand(), activation.getNamespace() );
 				//console = ex.getConsole();
@@ -93,7 +93,7 @@ public class Task {
 			} else if ( activation.getExecutorType().equals("BASH") ) {
 				logger.debug("running Bash Script " + activation.getCommand() );
 				BashExecutor ex = new BashExecutor();
-				exitCode = ex.run( activation.getCommand(), activation.getNamespace() );
+				exitCode = ex.execute( activation.getCommand(), activation.getNamespace() );
 				console = ex.getConsole();
 			} else {
 				logger.debug("running wrapper " + activation.getCommand() );

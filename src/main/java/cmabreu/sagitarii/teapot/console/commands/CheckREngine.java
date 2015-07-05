@@ -31,38 +31,25 @@ public class CheckREngine implements CommandLine.ICommand {
 	@Override
 	public boolean doIt(List<String> v) {
 		List<String> console = new ArrayList<String>();
-		String rScript; 
-		String workFolder;
-		XX
+
 		Rengine rengine = new Rengine(new String [] {"--vanilla"}, false, new TextConsole( console ) );
         if ( !rengine.waitForR() ) {
             System.out.println("Cannot load R");
             System.exit(1);
         }
 		
-		if ( v != null  ) {
-			rScript = v.get(1);
-			workFolder = v.get(2);
-	        rengine.eval("sagitariiWorkFolder <- \""+ workFolder +"\"");
-	        rengine.eval( "source( '" + rScript + "') " );
-	
-	        REXP message = rengine.eval("messageToSagitarii");
-	        if ( message != null ) {
-	        	console.add( message.toString() );
-	        }
-
-		} else {
-
-	        REXP message = rengine.eval("3 * 5 + 2");
-	        if ( message != null ) {
-	        	console.add( message.toString() );
-	        }		
+        REXP message = rengine.eval("3 * 5 + 2");
         
-		}
+        rengine.end();
+        
+        if ( message != null ) {
+        	console.add( message.toString() );
+        }		
 		
 		for ( String s : console ) {
 			System.out.println( s );
 		}
+		
 		
 		return true;
 	}
