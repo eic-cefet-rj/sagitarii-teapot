@@ -104,7 +104,7 @@ public class Activation implements Comparable<Activation> {
 	public String getNamespace() {
 		String result = "";
 		try {
-			result = getExperimentRootFolder() + "/" + fragment + "/" + instanceSerial + "/" + taskId;
+			result = getExperimentRootFolder() + "/" + fragment + "/" + instanceSerial + "/" + executor;
 		} catch ( Exception e ) {
 			
 		}
