@@ -26,12 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cmabreu.sagitarii.executors.BashExecutor;
-import cmabreu.sagitarii.teapot.console.commands.CheckREngine;
 
 public class Task {
 	private List<String> sourceData;
 	private List<String> console;
-	private String applicationName;
 	private TaskStatus status;
 	private int exitCode;
 	private Activation activation;
@@ -54,15 +52,14 @@ public class Task {
 	}
 
 	public String getApplicationName() {
-		return this.applicationName;
+		return activation.getCommand();
 	}
 
 	public String getTaskId() {
 		return this.activation.getTaskId();
 	}	
 
-	public Task( Activation activation, String applicationName ) {
-		this.applicationName = applicationName;
+	public Task( Activation activation ) {
 		this.activation = activation;
 		status = TaskStatus.STOPPED;
 		this.activation = activation;
@@ -80,26 +77,15 @@ public class Task {
 		status = TaskStatus.RUNNING;
 		try {
 
-			if ( activation.getExecutorType().equals("RSCRIPT") ) {
-				logger.debug("running R Script " + activation.getCommand() );
-				
-				CheckREngine re = new CheckREngine();
-				re.doIt( null );
-				
-				//RExecutor ex = new RExecutor();
-				//exitCode = ex.run( activation.getCommand(), activation.getNamespace() );
-				//console = ex.getConsole();
-				
-			} else if ( activation.getExecutorType().equals("BASH") ) {
+			if ( activation.getExecutorType().equals("BASH") ) {
 				logger.debug("running Bash Script " + activation.getCommand() );
 				BashExecutor ex = new BashExecutor();
 				exitCode = ex.execute( activation.getCommand(), activation.getNamespace() );
 				console = ex.getConsole();
 			} else {
-				logger.debug("running wrapper " + activation.getCommand() );
-				logger.debug("running wrapper " + applicationName );
+				logger.debug("running " + activation.getCommand() );
 
-				process = Runtime.getRuntime().exec(applicationName);
+				process = Runtime.getRuntime().exec( activation.getCommand() );
 				InputStream in = process.getInputStream(); 
 				BufferedReader br = new BufferedReader( new InputStreamReader(in) );
 				String line = null;

@@ -150,7 +150,7 @@ public class SystemProperties  {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
 		teapotJarPath =  f.getAbsolutePath();
-		teapotRootFolder = teapotJarPath.substring(0, teapotJarPath.lastIndexOf( File.separator ) + 1).replace("\\", "/");
+		teapotRootFolder = teapotJarPath.substring(0, teapotJarPath.lastIndexOf( File.separator ) + 1).replace(File.separator, "/");
 		
 		try {	
 			classPath = System.getenv("CLASSPATH");

@@ -146,11 +146,8 @@ public class Teapot {
 		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
-			command = wrapperFolder +  activation.getCommand();
-			//String rpath = gf.getrPath();
-			//command = "java -Djava.library.path="+rpath+" -jar r-wrapper.jar " + activation.getCommand() + " " + activation.getNamespace();
+			command = "java -jar "+wrapperFolder+"r-wrapper.jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
 		} else if ( activation.getExecutorType().equals("BASH") ) {
-			// Run bash comand
 			command = wrapperFolder + activation.getCommand();
 		} else {
 			command = "java -jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
@@ -200,16 +197,14 @@ public class Teapot {
 	 * BLOCKING
 	 */
 	private void runTask( Activation activation ) {
-		String applicationName = activation.getCommand();
 		String instanceId = activation.getInstanceSerial();
 		int order = activation.getOrder();
 
 		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ instanceId + "-" + order + "):");
-		logger.debug( applicationName );
         
 		activation.setStatus( TaskStatus.RUNNING );
 		
-		Task task = new Task( activation, applicationName );
+		Task task = new Task( activation );
 		task.setSourceData( activation.getSourceData() );
 		
 		try {

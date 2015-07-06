@@ -27,10 +27,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import cmabreu.sagitarii.executors.RExecutor;
 import cmabreu.sagitarii.teapot.comm.Communicator;
 import cmabreu.sagitarii.teapot.console.CommandLoader;
-import cmabreu.sagitarii.teapot.console.commands.CheckREngine;
 
 
 public class Main {
