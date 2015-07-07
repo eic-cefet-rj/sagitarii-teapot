@@ -93,14 +93,17 @@ public class Task {
 					console.add( line );
 					logger.debug( "[" + activation.getActivitySerial() + "] " + activation.getExecutor() + " > " + line );
 				}        	
-
 				process.waitFor();
 				exitCode = process.exitValue();
+				logger.debug("external wrapper finished.");
 			}     
 		} catch ( IOException e ) {
 			status = TaskStatus.ERROR;
+			logger.error( "run error: " + e.getMessage() );
+			return;
 		} catch (InterruptedException e) {
 			status = TaskStatus.ERROR;
+			logger.error( "run error: " + e.getMessage() );
 			return;
 		}
 		status = TaskStatus.FINISHED;

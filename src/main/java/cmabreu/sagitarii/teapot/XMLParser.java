@@ -71,10 +71,15 @@ public class XMLParser {
 	public List<Activation> parseActivations( String xml ) throws Exception {
 		logger.debug("parsing XML for tasks");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputSource is = new InputSource( new StringReader(xml) );
-		doc = dBuilder.parse( is );
-		doc.getDocumentElement().normalize();
+		try {
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			InputSource is = new InputSource( new StringReader(xml) );
+			doc = dBuilder.parse( is );
+			doc.getDocumentElement().normalize();
+		} catch ( Exception e ) {
+			logger.error( e.getMessage() );
+			throw e;
+		}
 		
 		NodeList pipeTag = doc.getElementsByTagName("instance");
 		Node pipeConf = pipeTag.item( 0 );
@@ -124,20 +129,29 @@ public class XMLParser {
 				try {
 					NodeList nFileList = mpElement.getElementsByTagName("files").item(0).getChildNodes();
 					for ( int y = 0; y < nFileList.getLength(); y++ ) {
-						Node nFile = (Node) nFileList.item( y );
-						Element fileElement = (Element)nFile;
-						String fileName = fileElement.getAttribute("name");
-						//String table = fileElement.getAttribute("table");
-						String attribute = fileElement.getAttribute("attribute");
-						String index = fileElement.getAttribute("index");
-						FileUnity fu = new FileUnity( fileName );
-						fu.setId( Integer.valueOf( index ) );
-						fu.setAttribute(attribute);
-						activation.addFile( fu );
+						if( nFileList.item(y).getNodeType() == Node.ELEMENT_NODE){
+							Element fileElement = (Element)nFileList.item(y);
+							String fileName = fileElement.getAttribute("name");
+							String table = fileElement.getAttribute("table");
+							String attribute = fileElement.getAttribute("attribute");
+							String index = fileElement.getAttribute("index");
+							FileUnity fu = new FileUnity( fileName );
+							fu.setId( Integer.valueOf( index ) );
+							fu.setAttribute(attribute);
+							fu.setSourceTable(table);
+							activation.addFile( fu );
+							
+							logger.debug("found file " + fileName + " in XML instance for executor " + executor + " in field " + attribute + 
+									"for executor " + executor + "(" + serial + ")" );
+							
+						} else {
+							Node nFile = (Node) nFileList.item( y );
+							logger.error("unknown node: " + nFile.getNodeName() );
+						}
 						
-						logger.debug("activity " + serial + " sends file " + fileName + " in XML instance for executor " + executor + " in field " + attribute);
 					}
 				} catch ( Exception e ) {
+					e.printStackTrace();
 					logger.error( e.getMessage() );
 				}
 				

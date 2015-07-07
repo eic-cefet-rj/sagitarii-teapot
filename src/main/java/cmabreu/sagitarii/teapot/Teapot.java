@@ -146,7 +146,12 @@ public class Teapot {
 		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
-			command = "java -jar "+wrapperFolder+"r-wrapper.jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
+			String wrapperCommand = wrapperFolder + "r-wrapper.jar";
+			String scriptFile = wrapperFolder + activation.getCommand();
+			String workFolder = activation.getNamespace();
+
+			command = "java -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrapperFolder;
+			
 		} else if ( activation.getExecutorType().equals("BASH") ) {
 			command = wrapperFolder + activation.getCommand();
 		} else {
@@ -155,8 +160,6 @@ public class Teapot {
 		return command;
 	}
 	
-	
-
 	private void executeNext( Task task ) {
 		logger.debug("searching for instance tasks for task " + task.getActivation().getExecutor() + " (index " + task.getActivation().getOrder() + ") fragment " + task.getActivation().getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());

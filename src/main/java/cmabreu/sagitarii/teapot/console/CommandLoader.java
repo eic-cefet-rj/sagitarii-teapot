@@ -42,6 +42,7 @@ public class CommandLoader extends Thread {
 		jr.assignClassToCommnd("quit", "cmabreu.sagitarii.teapot.console.commands.Quit");
 		jr.assignClassToCommnd("exit", "cmabreu.sagitarii.teapot.console.commands.Quit");
 		jr.assignClassToCommnd("system", "cmabreu.sagitarii.teapot.console.commands.CoreSystem");
+		jr.assignClassToCommnd("testrun", "cmabreu.sagitarii.teapot.console.commands.TestRun");
 
 		System.out.println("Interactive Mode Activated");
 		System.out.println("");

@@ -35,13 +35,13 @@ public class Main {
 	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.Main" ); 
 	private static CommandLoader cm;
 	private static long totalInstancesProcessed = 0;
-	private static Configurator configurator;
 	private static boolean paused = false;
 	private static List<TaskRunner> runners = new ArrayList<TaskRunner>();
 	private static boolean restarting = false;
 	private static boolean reloading = false;
 	private static boolean quiting = false;
 	private static Communicator communicator;
+	private static Configurator configurator;
 	
 	public static void pause() {
 		paused = true;
@@ -49,6 +49,10 @@ public class Main {
 	
 	public static long getTotalInstancesProcessed() {
 		return totalInstancesProcessed;
+	}
+	
+	public static Communicator getCommunicator() {
+		return communicator;
 	}
 	
 	public static Configurator getConfigurator() {
@@ -107,22 +111,6 @@ public class Main {
 			logger.debug("JRI       : " + configurator.getSystemProperties().getJriPath() );
 			logger.debug("Path      : " + configurator.getSystemProperties().getPath() );
 
-
-			/*
-			System.out.println("Teste 2");
-			RExecutor exec = new RExecutor();
-			exec.execute( "test.R", "/home/magno/" );
-			
-			for ( String s : exec.getConsole() ) {
-				System.out.println( s );
-			}
-			
-			System.exit(0);			
-			*/
-			
-			
-			
-			
 			logger.debug("cleaning workspace...");
 			cleanUp();
 			
@@ -144,10 +132,10 @@ public class Main {
 			logger.debug("Staring communicator...");
 			communicator = new Communicator( configurator );
 			
-			
 			if ( wrappersDownloaded ) {
 				logger.debug("Teapot started.");
 			}
+			
 			
 			// =============================================================
 			// =============================================================
@@ -158,6 +146,10 @@ public class Main {
 					cm = new CommandLoader();
 					cm.start();
 					LogManager.disableLoggers();
+				}
+
+				if( ( args.length > 1) && args[1].equalsIgnoreCase("norun") ) {
+					return;
 				}
 				
 			}

@@ -23,6 +23,7 @@ public class FileUnity {
 	
 	private	String name;
 	private String attribute;
+	private String sourceTable;
 	private int id;
 	
 	public FileUnity( String fileName ) {
@@ -30,6 +31,14 @@ public class FileUnity {
 		id = NOT_UPLOADED;
 	}
 
+	public void setSourceTable(String sourceTable) {
+		this.sourceTable = sourceTable;
+	}
+	
+	public String getSourceTable() {
+		return sourceTable;
+	}
+	
 	public String getAttribute() {
 		return attribute;
 	}
