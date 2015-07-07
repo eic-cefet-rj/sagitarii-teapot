@@ -17,12 +17,14 @@ package cmabreu.sagitarii.teapot.comm;
  * 
  */
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
@@ -92,17 +94,20 @@ public class Client {
 	        }
 	    }
 		
-	    xml.append("<console>");
+	    xml.append("<console><![CDATA[");
 	    if ( task != null ) {
 	    	for ( String line : task.getConsole() ) {
-	    		xml.append( line + "\n" );
+	    		byte pline[] = line.getBytes("UTF-8");
+	    		xml.append( new String(pline, "UTF-8") + "\n" );
 	    	}
 	    }
-	    xml.append("</console>");
+	    xml.append("]]></console>");
 	    
 		xml.append("</session>\n");
 		filesToSend.add( folder + File.separator + "session.xml" );
-		PrintWriter writer = new PrintWriter( new FileOutputStream(folder + File.separator + "session.xml") );
+		//PrintWriter writer = new PrintWriter( new FileOutputStream(folder + File.separator + "session.xml") );
+		
+		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(folder + File.separator + "session.xml"), "UTF-8"));
 		writer.write( xml.toString() );
 		writer.close();
 

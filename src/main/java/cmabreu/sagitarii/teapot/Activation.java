@@ -97,7 +97,7 @@ public class Activation implements Comparable<Activation> {
 	public String getExperimentRootFolder() throws Exception {
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
 		String teapotRoot =  f.getAbsolutePath();
-		teapotRoot = teapotRoot.substring(0, teapotRoot.lastIndexOf( File.separator ) + 1);
+		teapotRoot = teapotRoot.substring(0, teapotRoot.lastIndexOf( File.separator ) + 1).replace(File.separator, "/");
 		return teapotRoot + "namespaces" + "/" + workflow + "/" + experiment ;
 	}
 	
