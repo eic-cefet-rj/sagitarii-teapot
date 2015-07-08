@@ -141,8 +141,8 @@ public class XMLParser {
 							fu.setSourceTable(table);
 							activation.addFile( fu );
 							
-							logger.debug("found file " + fileName + " in XML instance for executor " + executor + " in field " + attribute + 
-									"for executor " + executor + "(" + serial + ")" );
+							logger.debug("found file " + fileName + " in XML instance. attribute:  " + attribute + " table: " + table +  
+									" executor: " + executor + "(" + serial + ")" );
 							
 						} else {
 							Node nFile = (Node) nFileList.item( y );
