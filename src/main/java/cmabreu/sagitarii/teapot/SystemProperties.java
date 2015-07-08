@@ -146,6 +146,16 @@ public class SystemProperties  {
         usrPathsField.set(null, newPaths);
     }
     
+    public long getFreeDiskSpace() {
+    	File myself = new File( teapotRootFolder );
+    	return myself.getUsableSpace() /1024 /1024 ;
+    }
+
+    public long getTotalDiskSpace() {
+    	File myself = new File( teapotRootFolder );
+    	return myself.getTotalSpace() /1024 /1024 ;
+    }
+
     public SystemProperties() throws Exception {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );

@@ -101,6 +101,10 @@ public class Main {
 			logger.debug("Cores     : " + configurator.getSystemProperties().getAvailableProcessors() + " cores." );
 			logger.debug("SO Name   : " + configurator.getSystemProperties().getSoName() );
 			logger.debug("Machine   : " + configurator.getSystemProperties().getMachineName() );
+
+			logger.debug("Free Space: " + configurator.getSystemProperties().getFreeDiskSpace() );
+
+			
 			logger.debug("SO family : " + configurator.getSystemProperties().getOsType() );
 			logger.debug("IP/MAC    : " +  configurator.getSystemProperties().getLocalIpAddress() + " / " + configurator.getSystemProperties().getMacAddress() );
 			logger.debug("Java      : " + configurator.getSystemProperties().getJavaVersion() );
@@ -255,6 +259,16 @@ public class Main {
 				sb.append( generateJsonPair( "elapsedTime" , tr.getTime() ) );
 				dataPrefix = ",";
 				sb.append("}");
+			} else {
+				sb.append( dataPrefix + "{");
+				sb.append( generateJsonPair( "workflow" , "UNKNOWN" ) + "," );
+				sb.append( generateJsonPair( "experiment" , "UNKNOWN" ) + "," );
+				sb.append( generateJsonPair( "taskId" , "UNKNOWN" ) + "," );
+				sb.append( generateJsonPair( "executor" , "UNKNOWN" ) + "," ); 
+				sb.append( generateJsonPair( "startTime" , "00:00:00" ) + "," );
+				sb.append( generateJsonPair( "elapsedTime" , "00:00:00" ) );
+				dataPrefix = ",";
+				sb.append("}");
 			}
 		}
 		sb.append("]");
@@ -264,6 +278,8 @@ public class Main {
 		data.append( generateJsonPair( "cpuLoad" , String.valueOf( configurator.getSystemProperties().getCpuLoad() ) ) + "," );
 		data.append( generateJsonPair( "freeMemory" , String.valueOf( configurator.getSystemProperties().getFreeMemory() ) ) + "," );
 		data.append( generateJsonPair( "totalMemory" , String.valueOf( configurator.getSystemProperties().getTotalMemory() ) ) + "," );
+		data.append( generateJsonPair( "totalDiskSpace" , String.valueOf( configurator.getSystemProperties().getTotalDiskSpace() ) ) + "," );
+		data.append( generateJsonPair( "freeDiskSpace" , String.valueOf( configurator.getSystemProperties().getFreeDiskSpace() ) ) + "," );
 		data.append( addArray("data", sb.toString() ) ); 
 		data.append("}");			
 		
