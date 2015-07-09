@@ -167,7 +167,7 @@ public class Main {
 				for ( TaskRunner tr : getRunners() ) {
 					if ( tr.getCurrentTask() != null ) {
 						String time = tr.getStartTime() + " (" + tr.getTime() + ")";
-						logger.debug( " > " + tr.getCurrentTask().getTaskId() + " (" + tr.getCurrentTask().getActivation().getExecutor() + ") : " + time);
+						logger.debug( " > " + tr.getCurrentTask().getTaskId() + " (" + tr.getCurrentActivation().getExecutor() + ") : " + time);
 					}
 				}
 				
@@ -248,13 +248,13 @@ public class Main {
 		String dataPrefix = "";
 		sb.append("[");
 		for ( TaskRunner tr : getRunners() ) {
-			if ( tr.getCurrentTask() != null ) {
-				logger.debug( " > " + tr.getCurrentTask().getTaskId() + " sent" );
+			if ( tr.getCurrentActivation() != null ) {
+				logger.debug( " > " + tr.getCurrentActivation().getTaskId() + " sent" );
 				sb.append( dataPrefix + "{");
-				sb.append( generateJsonPair( "workflow" , tr.getCurrentTask().getActivation().getWorkflow() ) + "," );
-				sb.append( generateJsonPair( "experiment" , tr.getCurrentTask().getActivation().getExperiment() ) + "," );
-				sb.append( generateJsonPair( "taskId" , tr.getCurrentTask().getTaskId() ) + "," );
-				sb.append( generateJsonPair( "executor" , tr.getCurrentTask().getActivation().getExecutor() ) + "," ); 
+				sb.append( generateJsonPair( "workflow" , tr.getCurrentActivation().getWorkflow() ) + "," );
+				sb.append( generateJsonPair( "experiment" , tr.getCurrentActivation().getExperiment() ) + "," );
+				sb.append( generateJsonPair( "taskId" , tr.getCurrentActivation().getTaskId() ) + "," );
+				sb.append( generateJsonPair( "executor" , tr.getCurrentActivation().getExecutor() ) + "," ); 
 				sb.append( generateJsonPair( "startTime" , tr.getStartTime() ) + "," );
 				sb.append( generateJsonPair( "elapsedTime" , tr.getTime() ) );
 				dataPrefix = ",";
@@ -391,7 +391,7 @@ public class Main {
 		boolean found = false;
 		for ( TaskRunner tr : getRunners() ) {
 			if ( tr.getCurrentTask() != null ) {
-				if ( tr.getCurrentTask().getActivation().getInstanceSerial().equals( instanceSerial ) ) {
+				if ( tr.getCurrentActivation().getInstanceSerial().equals( instanceSerial ) ) {
 					found = true;
 					break;
 				}
@@ -458,7 +458,7 @@ public class Main {
 			TaskRunner req = i.next(); 
 			if ( !req.isActive() ) {
 				try {
-					logger.debug(" > killing task runner " + req.getCurrentTask().getActivation().getExecutor() + " " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
+					logger.debug(" > killing task runner " + req.getCurrentActivation().getExecutor() + " " + req.getSerial() + " (" + req.getCurrentTask().getTaskId() + ")" );
 				} catch ( Exception e ) { 
 					logger.debug(" > killing null task runner");
 				}

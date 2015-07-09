@@ -47,11 +47,16 @@ public class Teapot {
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 	private List<Task> tasks = new ArrayList<Task>();
 	private Task currentTask = null;
+	private Activation currentActivation;
 	
 	public Task getCurrentTask() {
 		return currentTask;
 	}
 	
+	public Activation getCurrentActivation() {
+		return this.currentActivation;
+	}
+
 	public List<Activation> getJobPool() {
 		return new ArrayList<Activation>( jobPool );
 	}
@@ -60,8 +65,8 @@ public class Teapot {
 		return new ArrayList<Task>( tasks );
 	}
 	
-	public Teapot(SystemProperties tm, Communicator comm, Configurator gf) {
-		this.tm = tm;
+	public Teapot(Communicator comm, Configurator gf) {
+		this.tm = gf.getSystemProperties();
 		this.comm = comm;
 		this.configurator = gf;
 		this.parser = new XMLParser();
@@ -73,7 +78,7 @@ public class Teapot {
 	private void sanitize( Task task ) {
 		if ( configurator.getClearDataAfterFinish() ) {
 			try {
-				FileUtils.deleteDirectory( new File( task.getActivation().getNamespace() ) ); 
+				FileUtils.deleteDirectory( new File( currentActivation.getNamespace() ) ); 
 			} catch ( IOException e ) {
 				notifySagitarii( e.getMessage() );
 			}
@@ -161,9 +166,9 @@ public class Teapot {
 	}
 	
 	private void executeNext( Task task ) {
-		logger.debug("searching for instance tasks for task " + task.getActivation().getExecutor() + " (index " + task.getActivation().getOrder() + ") fragment " + task.getActivation().getFragment() 
+		logger.debug("searching for instance tasks for task " + currentActivation.getExecutor() + " (index " + currentActivation.getOrder() + ") fragment " + currentActivation.getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());
-		Activation previousActivation = task.getActivation();
+		Activation previousActivation = currentActivation;
 		int nextOrder = previousActivation.getOrder() + 1;
 		String fragmentId = previousActivation.getFragment();
 		if ( (task.getExitCode() == 0) && ( task.getSourceData().size() > 1 ) ) {
@@ -176,6 +181,7 @@ public class Teapot {
 					nextAct.setCommand( newCommand );
 					nextAct.setSourceData( task.getSourceData() );
 					nextAct.setPreviousActivation( previousActivation );
+					currentActivation = nextAct;
 					try {
 						saveInputData( nextAct );
 						runTask( nextAct );
@@ -190,7 +196,7 @@ public class Teapot {
 				}
 			}
 		} else {
-			logger.debug("task " + task.getActivation().getExecutor() + " have empty buffer or error exit code.");
+			logger.debug("task " + currentActivation.getExecutor() + " have empty buffer or error exit code.");
 		}
 	}
 	
@@ -234,9 +240,9 @@ public class Teapot {
 	* observer valido (neste caso, o observer eh esta classe).
 	*/
 	public synchronized void notify( Task task ) {
-		logger.debug("task " + task.getTaskId() + "("+ task.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
+		logger.debug("task " + task.getTaskId() + "("+ currentActivation.getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
-			Activation act = task.getActivation();
+			Activation act = currentActivation;
 			act.setStatus( TaskStatus.FINISHED );
 			
 			// Check output file
@@ -252,7 +258,7 @@ public class Teapot {
 			sanitize( task );
 			
 		} catch ( Exception e ) {
-			notifySagitarii("error finishing task " + task.getApplicationName() + " at " + task.getActivation().getNamespace() + " : " + e.getMessage() );
+			notifySagitarii("error finishing task " + task.getApplicationName() + " at " + currentActivation.getNamespace() + " : " + e.getMessage() );
 		}
 		
 	}
@@ -392,6 +398,7 @@ public class Teapot {
 
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
+					currentActivation = act;
 					notifySagitarii("starting executor " + act.getExecutor() );
 					logger.debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();

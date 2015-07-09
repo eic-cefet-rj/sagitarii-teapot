@@ -35,6 +35,10 @@ public class Task {
 	private Activation activation;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 
+	public Activation getActivation() {
+		return activation;
+	}
+	
 	public List<String> getSourceData() {
 		return sourceData;
 	}
@@ -113,8 +117,5 @@ public class Task {
 		return this.exitCode;
 	}
 
-	public Activation getActivation() {
-		return this.activation;
-	}
 
 }

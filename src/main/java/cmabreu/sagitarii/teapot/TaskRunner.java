@@ -54,8 +54,12 @@ public class TaskRunner extends Thread {
 		return teapot.getCurrentTask();
 	}
 	
+	public Activation getCurrentActivation() {
+		return teapot.getCurrentActivation();
+	}
+	
 	public TaskRunner( String response, Communicator communicator, Configurator configurator ) {
-		this.teapot = new Teapot(configurator.getSystemProperties(), communicator, configurator);
+		this.teapot = new Teapot( communicator, configurator);
 		this.serial = UUID.randomUUID().toString().substring(0, 5).toUpperCase();
 		this.response = response;
 		setName("Teapot Task Runner " + this.serial );
