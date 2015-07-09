@@ -177,8 +177,8 @@ public class Configurator {
 				Element mpElement = (Element) mpconfig;
 				String version = mpElement.getAttribute("version");
 				String type = mpElement.getAttribute("type");
-				String wrapperName = getTagValue("activityFile", mpElement);
-				String reload = getTagValue("reload", mpElement);
+				String wrapperName = mpElement.getAttribute("activity");
+				String hash = mpElement.getAttribute("hash");
 				String target = mpElement.getAttribute("target");
 				
 				Wrapper acc = new Wrapper();
@@ -186,7 +186,7 @@ public class Configurator {
 				acc.type = type;
 				acc.version = version;
 				acc.target = target;
-				acc.reload = reload.equals("true");
+				acc.hash = hash;
 				resp.add(acc);
 			} catch (Exception e){
 				System.out.println( e.getMessage() );

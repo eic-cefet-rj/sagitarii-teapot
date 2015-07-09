@@ -30,6 +30,7 @@ public class RepositoryManager {
 	private boolean hasFolder = false;
 	private Logger logger = LogManager.getLogger( this.getClass().getName()  );
 	private Configurator configurator;
+	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
 
 	public RepositoryManager( Configurator configurator ) {
 		this.configurator = configurator;
@@ -38,45 +39,78 @@ public class RepositoryManager {
 		this.hasFolder = createRepositoryFolder();
 	}
 
+	private void runInstaller( String script ) {
+		logger.warn(" > run install routine from " + folderName + "/" + script );
+	}
+	
 	private void downloadActivity( String sagitariiHost, String file ) throws Exception {
 		Downloader dl = new Downloader();
 		dl.download( sagitariiHost + "repository/" + file , folderName + "/" + file, false );
+	}
+	
+	private boolean checkHash( String hash ) {
+		for ( Wrapper wrapper : wrappers ) {
+			logger.debug("checking wrapper "+wrapper.fileName+" hash: " + wrapper.hash + " > " + hash);
+			if ( wrapper.hash.equals( hash ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void downloadWrappers(  ) throws Exception  {
 		String sagitariiHost = configurator.getHostURL();
 		OsType osType = configurator.getSystemProperties().getOsType();
 		if ( hasFolder ) {
+			logger.debug("Verifying wrappers...");
+
+			File manifest = new File( MANIFEST_FILE );
+			if ( manifest.exists() ) {
+				try {
+					Configurator gf = new Configurator( MANIFEST_FILE );
+					wrappers =  gf.getRepositoryList();
+					logger.debug("current manifest have " + wrappers.size() + " files");
+				} catch ( Exception e2 ) {
+					logger.error("Error reading existent repository manifest.");
+				}
+			}
+			
 			try {
 				downloadManifest( sagitariiHost + "getManifest" );
 			} catch ( Exception e ) {
 				throw e;
 			}
-			logger.debug("Verifying wrappers...");
+
+			List<Wrapper> newWrappers = new ArrayList<Wrapper>();
 			try {
-				Configurator gf;
-				List<Wrapper> act = new ArrayList<Wrapper>();
+				 
 				try {
-					gf = new Configurator( MANIFEST_FILE );
-					act =  gf.getRepositoryList();
+					Configurator gf = new Configurator( MANIFEST_FILE );
+					newWrappers =  gf.getRepositoryList();
 				} catch ( Exception e2 ) {
 					logger.error("Incorrect or empty Manifest file. Check if you have any Sagitarii Activity Executor registered.");
 					System.exit(1);
 				}
 				
-				for ( Wrapper acc : act ) {
-					if ( ( acc.target.toUpperCase().equals( osType.toString() ) || acc.target.toUpperCase().equals("ANY") ) && !acc.type.equals("SELECT") ) {
-						logger.debug( "Check " + acc.fileName + " " + acc.version + " " + acc.target );
-						File theFile = new File( folderName + File.separator + acc.fileName );
-						if ( ( !theFile.exists() ) || acc.reload  ) {
-							logger.debug("Downloading " + sagitariiHost + acc.fileName + " " + acc.version + ". Wait...");
+				for ( Wrapper wrapper : newWrappers ) {
+					if ( ( wrapper.target.toUpperCase().equals( osType.toString() ) || wrapper.target.toUpperCase().equals("ANY") ) ) {
+						logger.debug( "Check " + wrapper.fileName + " [" + wrapper.hash + "]" );
+
+						if ( !checkHash( wrapper.hash ) ) {
+							logger.debug("Downloading " + sagitariiHost + wrapper.fileName + " " + wrapper.version + ". Wait...");
 							try {
-								downloadActivity( sagitariiHost, acc.fileName );
-								logger.debug(acc.fileName + " ok.");
+								downloadActivity( sagitariiHost, wrapper.fileName );
+								logger.debug(wrapper.fileName + " ok.");
+								if ( wrapper.type.equals("RSCRIPT") ) {
+									runInstaller( wrapper.fileName );
+								}
 							} catch ( Exception e ) {
-								logger.error(acc.fileName + " not found : " + e.getMessage() );
+								logger.error(wrapper.fileName + " not found : " + e.getMessage() );
 							}
+						} else {
+							logger.debug("already have wrapper " + wrapper.fileName + " with this hash.");
 						}
+						
 					}
 				}
 				logger.debug("Done verifying wrappers.");
