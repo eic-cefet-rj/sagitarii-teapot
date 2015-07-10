@@ -19,7 +19,6 @@ package cmabreu.sagitarii.teapot;
  */
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -30,11 +29,23 @@ import cmabreu.sagitarii.executors.BashExecutor;
 public class Task {
 	private List<String> sourceData;
 	private List<String> console;
+	private List<String> execLog;
 	private TaskStatus status;
 	private int exitCode;
 	private Activation activation;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 
+	
+	private void error( String s ) {
+		execLog.add( s );
+		logger.error( s );
+	}
+	
+	private void debug( String s ) {
+		execLog.add( s );
+		logger.debug( s );
+	}
+	
 	public Activation getActivation() {
 		return activation;
 	}
@@ -45,6 +56,10 @@ public class Task {
 
 	public List<String> getConsole() {
 		return console;
+	}
+	
+	public List<String> getExecLog() {
+		return execLog;
 	}
 
 	public void setSourceData(List<String> sourceData) {
@@ -63,11 +78,12 @@ public class Task {
 		return this.activation.getTaskId();
 	}	
 
-	public Task( Activation activation ) {
+	public Task( Activation activation, List<String> execLog ) {
 		this.activation = activation;
 		status = TaskStatus.STOPPED;
 		this.activation = activation;
 		this.console = new ArrayList<String>();
+		this.execLog = execLog;
 	}
 	
 	/**
@@ -82,12 +98,12 @@ public class Task {
 		try {
 
 			if ( activation.getExecutorType().equals("BASH") ) {
-				logger.debug("running Bash Script " + activation.getCommand() );
+				debug("running Bash Script " + activation.getCommand() );
 				BashExecutor ex = new BashExecutor();
 				exitCode = ex.execute( activation.getCommand(), activation.getNamespace() );
 				console = ex.getConsole();
 			} else {
-				logger.debug("running " + activation.getCommand() );
+				debug("running external wrapper " + activation.getCommand() );
 
 				process = Runtime.getRuntime().exec( activation.getCommand() );
 				InputStream in = process.getInputStream(); 
@@ -99,15 +115,11 @@ public class Task {
 				}        	
 				process.waitFor();
 				exitCode = process.exitValue();
-				logger.debug("external wrapper finished.");
+				debug("external wrapper finished.");
 			}     
-		} catch ( IOException e ) {
+		} catch ( Exception ex ){
 			status = TaskStatus.ERROR;
-			logger.error( "run error: " + e.getMessage() );
-			return;
-		} catch (InterruptedException e) {
-			status = TaskStatus.ERROR;
-			logger.error( "run error: " + e.getMessage() );
+			error( "run error: " + ex.getMessage() );
 			return;
 		}
 		status = TaskStatus.FINISHED;

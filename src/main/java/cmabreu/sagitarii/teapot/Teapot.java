@@ -48,6 +48,19 @@ public class Teapot {
 	private List<Task> tasks = new ArrayList<Task>();
 	private Task currentTask = null;
 	private Activation currentActivation;
+	private List<String> execLog = new ArrayList<String>();
+	
+	private void debug( String s ) {
+		if ( !s.equals("")) {
+			logger.debug( s );
+			execLog.add( s );
+		}
+	}
+	
+	private void error( String s ) {
+		logger.error( s );
+		execLog.add( "[ERROR] " +  s );
+	}
 	
 	public Task getCurrentTask() {
 		return currentTask;
@@ -93,31 +106,33 @@ public class Teapot {
 		String sagiOutput = taskFolder + "/" + "sagi_output.txt";
 		String outbox = taskFolder + "/" + "outbox";
 
-		logger.debug("check output folder " + outbox );
+		debug("check output folder " + outbox );
 		
 		try {
 			File file = new File(sagiOutput);
 			if( !file.exists() ) { 
 				notifySagitarii("output CSV data file sagi_output.txt not found");
 				return;
-			} 	
+			} 
 			if ( file.length() == 0 ) { 
 				notifySagitarii("output CSV data file sagi_output.txt is empty");
 				return;
-			}		
+			} else {
+				debug(" > sagi_output.txt have " + file.length() + " lines.");
+			}
 			BufferedReader br = new BufferedReader( new FileReader( file ) );
 			String header = br.readLine(); 					
 			if ( header == null ) { 
 				notifySagitarii("output CSV data file sagi_output.txt have no header line");
 				br.close();
 				return;
-			}
+			} 
 			String line = br.readLine(); 					
 			if ( line == null ) { 
 				notifySagitarii("output CSV data file sagi_output.txt have no data line");
 				br.close();
 				return;
-			}
+			} 
 			br.close();
 		} catch ( Exception e ) {
 			notifySagitarii("validateProduct: " + e.getMessage() );
@@ -126,19 +141,28 @@ public class Teapot {
 		
 		File outboxDir = new File( outbox );
 		if( outboxDir.list().length == 0 ){
-			logger.warn("no files found in outbox");
+			debug("no files found in outbox");
+		} else {
+			debug( outboxDir.list().length + " files found in outbox (first 10):");
+			int limit = 10;
+			if ( limit > outboxDir.list().length ) {
+				limit = outboxDir.list().length;
+			}
+			for ( int i = 0; i < limit; i++  ) {
+				debug( " > " + outboxDir.list()[i] );
+			}
 		}
 		outboxDir = null;
 	}
 	
 	
 	public void notifySagitarii( String message ) {
-		logger.debug( message );
+		debug( message );
 		try {
 			String parameters = "macAddress=" + tm.getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
 			comm.send("receiveErrorLog", parameters);
 		} catch ( Exception e ) {
-			logger.error("cannot notify Sagitarii: " + e.getMessage() );
+			error("cannot notify Sagitarii: " + e.getMessage() );
 		}
 	}
 	
@@ -166,16 +190,16 @@ public class Teapot {
 	}
 	
 	private void executeNext( Task task ) {
-		logger.debug("searching for instance tasks for task " + currentActivation.getExecutor() + " (index " + currentActivation.getOrder() + ") fragment " + currentActivation.getFragment() 
+		debug("searching for instance tasks for task " + currentActivation.getExecutor() + " (index " + currentActivation.getOrder() + ") fragment " + currentActivation.getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());
 		Activation previousActivation = currentActivation;
 		int nextOrder = previousActivation.getOrder() + 1;
 		String fragmentId = previousActivation.getFragment();
 		if ( (task.getExitCode() == 0) && ( task.getSourceData().size() > 1 ) ) {
 			for ( Activation nextAct : executionQueue ) {
-				logger.debug(" > checking task " + nextAct.getExecutor() + " order " + nextAct.getOrder() + " fragment " + nextAct.getFragment() );
+				debug(" > checking task " + nextAct.getExecutor() + " order " + nextAct.getOrder() + " fragment " + nextAct.getFragment() );
 				if( (nextAct.getOrder() == nextOrder) && ( nextAct.getFragment().equals(fragmentId) ) ) {
-					logger.debug( " > accepted." );
+					debug( " > accepted." );
 					executionQueue.remove( nextAct );
 					String newCommand = generateCommand( nextAct );
 					nextAct.setCommand( newCommand );
@@ -186,17 +210,17 @@ public class Teapot {
 						saveInputData( nextAct );
 						runTask( nextAct );
 					} catch ( Exception e ) {
-						logger.error( e.getMessage() );
+						error( e.getMessage() );
 						comm.send("activityManagerReceiver", "instanceId=" + nextAct.getInstanceSerial() + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
 						notifySagitarii( e.getMessage() );
 					}
 					return;
 				} else {
-					logger.debug(" > not accepted.");
+					debug(" > not accepted.");
 				}
 			}
 		} else {
-			logger.debug("task " + currentActivation.getExecutor() + " have empty buffer or error exit code.");
+			debug("task " + currentActivation.getExecutor() + " have empty buffer or error exit code.");
 		}
 	}
 	
@@ -209,11 +233,11 @@ public class Teapot {
 		String instanceId = activation.getInstanceSerial();
 		int order = activation.getOrder();
 
-		logger.debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getActivitySerial() + " ("+ instanceId + "-" + order + "):");
+		debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getExecutor() + " ("+ instanceId + " :: " + order + ")");
         
 		activation.setStatus( TaskStatus.RUNNING );
 		
-		Task task = new Task( activation );
+		Task task = new Task( activation, execLog );
 		task.setSourceData( activation.getSourceData() );
 		
 		try {
@@ -233,14 +257,10 @@ public class Teapot {
 	}
 	
 	/**
-	* Implementacao de ITaskObserver.notify()
-	* Recebe uma noficacao quando uma tarefa nao concluida.
-	* Este metodo eh propagado desde ITask (quando termina a thread) e passa pelo TaskManager.notify()
-	* que dispara ITaskObserver.notify() caso tenha sido chamado ITaskObserver.setObserver com um 
-	* observer valido (neste caso, o observer eh esta classe).
+	* Implementation of ITaskObserver.notify()
 	*/
 	public synchronized void notify( Task task ) {
-		logger.debug("task " + task.getTaskId() + "("+ currentActivation.getExecutor() + ") finished. (" + task.getExitCode() + ")" );
+		debug("task " + task.getTaskId() + "("+ currentActivation.getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
 			Activation act = currentActivation;
 			act.setStatus( TaskStatus.FINISHED );
@@ -281,7 +301,7 @@ public class Teapot {
 	 * Salva os dados iniciais em uma pasta para trabalho.
 	 */
 	private void saveInputData( Activation act ) throws Exception {
-		logger.debug("start data preparation for task " + act.getExecutor() + " (Activity: " + act.getActivitySerial() + "/ Task: " + act.getTaskId() + ")" );
+		debug("start data preparation for task " + act.getExecutor() + " (Activity: " + act.getActivitySerial() + "/ Task: " + act.getTaskId() + ")" );
 		if ( act.getSourceData().size() < 2 ) {
 			// We need at least 2 lines ( one line for header and one line of data )
 			notifySagitarii( "Not enough input data. Aborting..." );
@@ -304,15 +324,15 @@ public class Teapot {
 			  writer.write( str + "\n" );
 			}
 			writer.close();
-			logger.debug( " > input data file sagi_input.txt saved with " + act.getSourceData().size() + " lines");
+			debug( "input data file sagi_input.txt saved with " + act.getSourceData().size() + " lines");
 			
 			// Copy files from previous task's output to this input box.
 			File source = new File( previousOutbox );
 			File dest = new File( destInbox );
 			if ( !isDirEmpty( source.toPath() )  ) {
-				logger.debug(" > will copy files from previous task " + previous.getTaskId() + "..." );
-				logger.debug("   from > " + previousOutbox );
-				logger.debug("   to   > " + destInbox );
+				debug(" > will copy files from previous task " + previous.getTaskId() + "..." );
+				debug("   from > " + previousOutbox );
+				debug("   to   > " + destInbox );
 				
 				FileUtils.copyDirectory( source, dest );
 			}
@@ -323,28 +343,28 @@ public class Teapot {
 			  writer.write( str + "\n" );
 			}
 			writer.close();
-			logger.debug( " > input data file sagi_input.txt saved with " + act.getSourceData().size() + " lines");
+			debug( "input data file sagi_input.txt saved with " + act.getSourceData().size() + " lines");
 			
 			// Check if Sagitarii ask us to download some files...
 			if ( act.getFiles().size() > 0 ) {
-				logger.debug(" > this task needs to download " + act.getFiles().size() + " files");
+				debug("this task needs to download " + act.getFiles().size() + " files: ");
 				Downloader dl = new Downloader();
 				for ( FileUnity file : act.getFiles() ) {
-					logger.debug(" > will need file " + file.getName() + " for attribute " + file.getAttribute() );
+					debug("need file " + file.getName() + " (id " + file.getId() + ") for attribute " + file.getAttribute() +
+							" of table " + file.getSourceTable() );
 					String url = configurator.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + configurator.getSystemProperties().getMacAddress();
 					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					
 					notifySagitarii("downloading " + file.getName() );
-					
 					dl.download(url, target, true);
 				}
 				notifySagitarii("");
 			} else {
-				logger.debug("no need to download files.");
+				debug("no need to download files.");
 			}
 	
 		}
-		logger.debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
+		debug("done preparing task " + act.getExecutor() + " (" + act.getActivitySerial() + "/" + act.getTaskId() + ")" );
 	}
 	
 	// Read a text file and save into a List
@@ -379,7 +399,7 @@ public class Teapot {
 		xml = xml.replaceAll("><", ">\n<");
 		writer.write( xml );
 		writer.close();		
-		logger.debug("XML source data file saved");
+		debug("XML source data file saved");
 	}
 	
 	
@@ -388,7 +408,6 @@ public class Teapot {
 	 * Ao fazer isso, o Sagitarii poderah enviar uma nova tarefa.
 	 */
 	public void process( String response ) throws Exception {
-		logger.debug("process");
 		String instanceSerial = "";
 		try {
 			
@@ -400,7 +419,7 @@ public class Teapot {
 				if( act.getOrder() == 0 ) {
 					currentActivation = act;
 					notifySagitarii("starting executor " + act.getExecutor() );
-					logger.debug("execute first task in instance " + act.getInstanceSerial() );
+					debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
 					String newCommand = generateCommand( act );
@@ -413,7 +432,7 @@ public class Teapot {
 			}
 			
 		} catch (Exception e) {
-			logger.error( e.getMessage() );
+			error( e.getMessage() );
 			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
 			notifySagitarii( e.getMessage() );
 		}

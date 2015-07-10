@@ -84,13 +84,13 @@ public class Client {
 				"\" experiment=\""+experimentSerial + "\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
 		
 		xml.append("<file name=\""+fileName+"\" type=\"FILE_TYPE_CSV\" />\n");
-		filesToSend.add( folder + File.separator + fileName );
+		filesToSend.add( folder + "/" + fileName );
 		
-		File filesFolder = new File( folder + File.separator + "outbox" );
+		File filesFolder = new File( folder + "/" + "outbox" );
 	    for (final File fileEntry : filesFolder.listFiles() ) {
 	        if ( !fileEntry.isDirectory() ) {
 	    		xml.append("<file name=\""+fileEntry.getName()+"\" type=\"FILE_TYPE_FILE\" />\n");
-	    		filesToSend.add( folder + File.separator + "outbox" + File.separator + fileEntry.getName() );
+	    		filesToSend.add( folder + "/" + "outbox" + "/" + fileEntry.getName() );
 	        }
 	    }
 		
@@ -102,12 +102,22 @@ public class Client {
 	    	}
 	    }
 	    xml.append("]]></console>");
+
+	    
+	    xml.append("<execLog><![CDATA[");
+	    if ( task != null ) {
+	    	for ( String line : task.getExecLog() ) {
+	    		byte pline[] = line.getBytes("UTF-8");
+	    		xml.append( new String(pline, "UTF-8") + "\n" );
+	    	}
+	    }
+	    xml.append("]]></execLog>");
 	    
 		xml.append("</session>\n");
-		filesToSend.add( folder + File.separator + "session.xml" );
-		//PrintWriter writer = new PrintWriter( new FileOutputStream(folder + File.separator + "session.xml") );
+		filesToSend.add( folder + "/" + "session.xml" );
+		//PrintWriter writer = new PrintWriter( new FileOutputStream(folder + "/" + "session.xml") );
 		
-		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(folder + File.separator + "session.xml"), "UTF-8"));
+		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(folder + "/" + "session.xml"), "UTF-8"));
 		writer.write( xml.toString() );
 		writer.close();
 
