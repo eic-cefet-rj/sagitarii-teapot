@@ -42,6 +42,7 @@ public class Uploader {
 		
 		Client client = new Client( gf );
 		client.sendFile( fileName, filesFolderName,	relationName, experimentSerial, macAddress, task );
+
 		logger.debug( "done uploading " + fileName);
 	}
 

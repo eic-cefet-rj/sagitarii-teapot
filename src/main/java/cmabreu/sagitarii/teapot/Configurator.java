@@ -47,6 +47,7 @@ public class Configurator {
 	private char CSVDelimiter; 
 	private int fileSenderDelay;
 	private String storageHost;
+	private String rPath;
 	private int storagePort;
 	private boolean useSpeedEqualizer;
 	private boolean enforceTaskLimitToCores;
@@ -164,6 +165,7 @@ public class Configurator {
 			e.printStackTrace();
 			logger.error("XML file " + file + " not found.");
 		}	
+
 		systemProperties = new SystemProperties();
 	}
 	
@@ -196,6 +198,10 @@ public class Configurator {
 		return resp;
 	}
 	
+	public String getrPath() {
+		return rPath;
+	}
+	
 	public void loadMainConfig()  {
 			
 			NodeList mapconfig = doc.getElementsByTagName("cluster");
@@ -207,6 +213,9 @@ public class Configurator {
 				poolIntervalMilliSeconds = Integer.valueOf( getTagValue("poolIntervalMilliSeconds", mpElement) );
 				activationsMaxLimit = Integer.valueOf( getTagValue("activationsMaxLimit", mpElement) );
 				storageHost = getTagValue("storageHost", mpElement);
+				rPath = getTagValue("rPath", mpElement);
+				
+				
 				storagePort = Integer.valueOf( getTagValue("storagePort", mpElement) );
 				fileSenderDelay = Integer.valueOf( getTagValue("fileSenderDelay", mpElement) );
 				showConsole = Boolean.parseBoolean( getTagValue("activationShowConsole", mpElement) );
@@ -227,7 +236,13 @@ public class Configurator {
 					proxyInfo.setPort( Integer.parseInt(getValue("proxy", "proxy-port"))  );
 					proxyInfo.setPassword( getValue("proxy", "proxy-password") );
 					proxyInfo.setUser( getValue("proxy", "proxy-user") );
-				} 			
+				} 	
+				
+				if ( ( systemProperties.getJriPath() == null ) || systemProperties.getJriPath().equals("") ) {
+					systemProperties.setJriPath( rPath );
+				}
+
+				
 			} catch ( Exception e ) {
 				System.out.println( e.getMessage() );
 			}

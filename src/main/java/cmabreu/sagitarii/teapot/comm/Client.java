@@ -60,7 +60,6 @@ public class Client {
 	public void sendFile( String fileName, String folder, String targetTable, String experimentSerial,  
 			String macAddress, Task task ) throws Exception {
 
-		
 		String instanceSerial = "";
 		String activity = "";
 		String fragment = "";
@@ -83,8 +82,14 @@ public class Client {
 				"\" activity=\""+activity+"\"  taskId=\""+taskId+"\" exitCode=\""+exitCode+"\" fragment=\""+fragment + 
 				"\" experiment=\""+experimentSerial + "\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
 		
-		xml.append("<file name=\""+fileName+"\" type=\"FILE_TYPE_CSV\" />\n");
-		filesToSend.add( folder + "/" + fileName );
+		
+		File fil = new File(folder + "/" + fileName);
+		if ( fil.exists() ) {
+			xml.append("<file name=\""+fileName+"\" type=\"FILE_TYPE_CSV\" />\n");
+			filesToSend.add( folder + "/" + fileName );
+		} else {
+			logger.error("will not send sagi_output.txt in session.xml file: this activity instance produced no data");
+		}
 		
 		File filesFolder = new File( folder + "/" + "outbox" );
 	    for (final File fileEntry : filesFolder.listFiles() ) {
@@ -94,6 +99,8 @@ public class Client {
 	        }
 	    }
 		
+	    xml.append("<file name=\"session.xml\" type=\"FILE_TYPE_SESSION\" />\n");
+	    
 	    xml.append("<console><![CDATA[");
 	    if ( task != null ) {
 	    	for ( String line : task.getConsole() ) {
@@ -115,7 +122,6 @@ public class Client {
 	    
 		xml.append("</session>\n");
 		filesToSend.add( folder + "/" + "session.xml" );
-		//PrintWriter writer = new PrintWriter( new FileOutputStream(folder + "/" + "session.xml") );
 		
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(folder + "/" + "session.xml"), "UTF-8"));
 		writer.write( xml.toString() );

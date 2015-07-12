@@ -156,6 +156,12 @@ public class SystemProperties  {
     	return myself.getTotalSpace() /1024 /1024 ;
     }
 
+    
+    public void setJriPath( String path ) {
+    	jriPath = path;
+    	try { addLibraryPath(path); } catch ( Exception e ) { } 
+    }
+    
     public SystemProperties() throws Exception {
     	
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
@@ -169,12 +175,6 @@ public class SystemProperties  {
 		} catch ( Exception e ) {
 			
 		}
-		
-		if ( ( jriPath == null ) || jriPath.equals("") ) {
-			jriPath = "/usr/local/lib/R/site-library/rJava/jri/";
-			addLibraryPath( jriPath );
-		}
-
 		
 		path = System.getProperty( "java.library.path");
 

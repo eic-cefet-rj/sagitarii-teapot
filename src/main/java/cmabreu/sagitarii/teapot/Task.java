@@ -92,7 +92,7 @@ public class Task {
 	 * WIll block until task is finished
 	 * 
 	 */
-	public void run() {
+	public void run( Configurator conf ) {
 		Process process = null;
 		status = TaskStatus.RUNNING;
 		try {
@@ -104,7 +104,6 @@ public class Task {
 				console = ex.getConsole();
 			} else {
 				debug("running external wrapper " + activation.getCommand() );
-
 				process = Runtime.getRuntime().exec( activation.getCommand() );
 				InputStream in = process.getInputStream(); 
 				BufferedReader br = new BufferedReader( new InputStreamReader(in) );

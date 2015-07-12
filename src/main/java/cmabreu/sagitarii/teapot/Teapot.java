@@ -102,41 +102,43 @@ public class Teapot {
 	 * Check if sagi_output have some data
 	 * 
 	 */
-	private void validateProduct( String taskFolder ) {
+	private boolean validateProduct( Activation act ) {
+		String taskFolder = act.getNamespace();
 		String sagiOutput = taskFolder + "/" + "sagi_output.txt";
 		String outbox = taskFolder + "/" + "outbox";
+		String executor = act.getExecutor(); 
 
-		debug("check output folder " + outbox );
+		debug("check executor " + executor + " output folder " + outbox );
 		
 		try {
 			File file = new File(sagiOutput);
 			if( !file.exists() ) { 
-				notifySagitarii("output CSV data file sagi_output.txt not found");
-				return;
+				notifySagitarii( executor + ": output CSV data file sagi_output.txt not found");
+				return false;
 			} 
 			if ( file.length() == 0 ) { 
-				notifySagitarii("output CSV data file sagi_output.txt is empty");
-				return;
+				notifySagitarii( executor + ": output CSV data file sagi_output.txt is empty");
+				return false;
 			} else {
-				debug(" > sagi_output.txt have " + file.length() + " lines.");
+				debug( executor + ": sagi_output.txt have " + file.length() + " lines.");
 			}
 			BufferedReader br = new BufferedReader( new FileReader( file ) );
 			String header = br.readLine(); 					
 			if ( header == null ) { 
-				notifySagitarii("output CSV data file sagi_output.txt have no header line");
+				notifySagitarii( executor + ": output CSV data file sagi_output.txt have no header line");
 				br.close();
-				return;
+				return false;
 			} 
 			String line = br.readLine(); 					
 			if ( line == null ) { 
-				notifySagitarii("output CSV data file sagi_output.txt have no data line");
+				notifySagitarii( executor + ": output CSV data file sagi_output.txt have no data line");
 				br.close();
-				return;
+				return false;
 			} 
 			br.close();
 		} catch ( Exception e ) {
-			notifySagitarii("validateProduct: " + e.getMessage() );
-			return;
+			notifySagitarii( executor + ": " + e.getMessage() );
+			return false;
 		}
 		
 		File outboxDir = new File( outbox );
@@ -153,6 +155,7 @@ public class Teapot {
 			}
 		}
 		outboxDir = null;
+		return true;
 	}
 	
 	
@@ -174,17 +177,19 @@ public class Teapot {
 	private String generateCommand( Activation activation ) {
 		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
+		String classPathParam = "-Djava.library.path=" + configurator.getSystemProperties().getJriPath();
+
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
 			String wrapperCommand = wrapperFolder + "r-wrapper.jar";
 			String scriptFile = wrapperFolder + activation.getCommand();
 			String workFolder = activation.getNamespace();
-
-			command = "java -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrapperFolder;
+			
+			command = "java "+classPathParam+" -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrapperFolder;
 			
 		} else if ( activation.getExecutorType().equals("BASH") ) {
 			command = wrapperFolder + activation.getCommand();
 		} else {
-			command = "java -jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
+			command = "java "+classPathParam+" -jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
 		}
 		return command;
 	}
@@ -246,7 +251,7 @@ public class Teapot {
 	        currentTask = task;
 	        
 	        // Will Block Until Finished ...
-	        task.run();
+	        task.run( configurator );
 	        
 	        // When finished...
 	        notify( task );
@@ -262,18 +267,26 @@ public class Teapot {
 	public synchronized void notify( Task task ) {
 		debug("task " + task.getTaskId() + "("+ currentActivation.getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
+			
+			// TODO: Activation act = task.getActivation();  // Check if it is equals to currentActivation 
+			
 			Activation act = currentActivation;
 			act.setStatus( TaskStatus.FINISHED );
 			
+			
 			// Check output file
-			validateProduct( act.getNamespace() );
-
-			// Send data and files
+			if ( !validateProduct( act ) ) {
+				error(currentActivation.getExecutor() + ": NO OUTPUT CSV DATA FOUND");
+			}
+				
+			// Send data and files // Do not be tempted to simplify act parameter. It must be this way
+			// because upload command line passes this parameters too
 			new Uploader(configurator).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
 					act.getNamespace() , task, tm );
 			
 			// Run next task in same instance (if exists)
 			executeNext( task );
+
 			// Clean up
 			sanitize( task );
 			
