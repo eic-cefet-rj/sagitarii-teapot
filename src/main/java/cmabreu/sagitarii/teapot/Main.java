@@ -328,11 +328,11 @@ public class Main {
 				logger.warn("get quit command from Sagitarii");
 				quit();
 			} else
-				if ( response.contains( "INFORM" ) ) {
-					String[] data = response.split("#");
-					logger.warn("Sagitarii is asking for Instance " + data[1] );
-					inform( data[1] );
-				} else
+			if ( response.contains( "INFORM" ) ) {
+				String[] data = response.split("#");
+				logger.warn("Sagitarii is asking for Instance " + data[1] );
+				inform( data[1] );
+			} else
 			if ( response.equals( "COMM_CLEAN_WORKSPACE" ) ) {
 				logger.warn("get clean workspace command from Sagitarii");
 				if (  getRunners().size() > 0 ) {

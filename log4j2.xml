@@ -30,7 +30,7 @@
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.TaskRunner" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.TaskRunner" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
@@ -42,27 +42,27 @@
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.Task" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.Task" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Main" level="error" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.Main" level="debug" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
