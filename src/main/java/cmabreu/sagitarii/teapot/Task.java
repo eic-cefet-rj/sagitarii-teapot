@@ -108,20 +108,31 @@ public class Task {
 				InputStream in = process.getInputStream(); 
 				BufferedReader br = new BufferedReader( new InputStreamReader(in) );
 				String line = null;
+
+				InputStream es = process.getErrorStream();
+				BufferedReader errorReader = new BufferedReader(  new InputStreamReader(es) );
+				while ( (line = errorReader.readLine() ) != null) {
+					console.add( line );
+					logger.error( line );
+				}	
+				errorReader.close();
+				
 				while( ( line=br.readLine() )!=null ) {
 					console.add( line );
 					logger.debug( "[" + activation.getActivitySerial() + "] " + activation.getExecutor() + " > " + line );
-				}        	
-				process.waitFor();
-				exitCode = process.exitValue();
-				debug("external wrapper finished.");
+				}  
+				br.close();
+				
+				exitCode = process.waitFor();
 			}     
 		} catch ( Exception ex ){
-			status = TaskStatus.ERROR;
-			error( "run error: " + ex.getMessage() );
-			return;
+			error( ex.getMessage() );
+			for ( StackTraceElement ste : ex.getStackTrace() ) {
+				error( ste.toString() );
+			}
 		}
 		status = TaskStatus.FINISHED;
+		debug("external wrapper finished.");
 	}
 
 	public int getExitCode() {

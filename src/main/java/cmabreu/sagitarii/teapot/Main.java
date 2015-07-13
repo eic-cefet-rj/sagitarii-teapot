@@ -82,6 +82,7 @@ public class Main {
 
 	 */
 	public static void main( String[] args ) {
+		
 		boolean wrappersDownloaded = false;
 		try {
 			System.out.println("");
@@ -397,12 +398,19 @@ public class Main {
 				}
 			}
 		}
-		// TODO: Report to Sagitarii !!
+		
+		String status = "";
 		if ( found ) {
+			status = "RUNNING";
 			logger.debug("Instance "+instanceSerial+" is running");
 		} else {
+			status = "NOT_FOUND";
 			logger.debug("Instance "+instanceSerial+" not found");
 		}
+		String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + 
+				"&instance=" + instanceSerial + "&status" + status;
+		communicator.send("taskStatusReport", parameters);
+
 	}
 	
 	/**
