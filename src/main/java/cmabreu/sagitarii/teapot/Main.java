@@ -1,23 +1,5 @@
 package cmabreu.sagitarii.teapot;
 
-/**
- * Copyright 2015 Carlos Magno Abreu
- * magno.mabreu@gmail.com 
- *
- * Licensed under the Apache  License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required  by  applicable law or agreed to in  writing,  software
- * distributed   under the  License is  distributed  on  an  "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the  specific language  governing  permissions  and
- * limitations under the License.
- * 
- */
-
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -40,6 +22,7 @@ public class Main {
 	private static boolean restarting = false;
 	private static boolean reloading = false;
 	private static boolean quiting = false;
+	private static boolean cleaning = false;
 	private static Communicator communicator;
 	private static Configurator configurator;
 	
@@ -68,10 +51,17 @@ public class Main {
 	 * Chamado antes de iniciar os trabalhos para sempre ter um namespace limpo.
 	 */
 	private static void cleanUp() {
-		try {
-			FileUtils.deleteDirectory( new File( "namespaces" ) ); 
-		} catch ( IOException e ) {
-			logger.error( e.getMessage() ); 
+		cleaning = true;
+		if (  getRunners().size() > 0 ) {
+			logger.warn("will not clean workspace. " + getRunners().size() + " tasks still runnig");
+		} else {
+			try {
+				FileUtils.deleteDirectory( new File( "namespaces" ) ); 
+			} catch ( IOException e ) {
+				logger.error( e.getMessage() ); 
+			}
+			logger.warn("workspace cleaned");
+			cleaning = false;
 		}
 	}
 
@@ -188,25 +178,29 @@ public class Main {
 						String response = "NO_DATA";
 						try {
 							if ( runners.size() < configurator.getActivationsMaxLimit() ) {
-								logger.debug( "asking Sagitarii for tasks to process...");
-								response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
-										configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
-								if ( response.length() > 0 ) {
-									logger.debug("Sagitarii answered " + response.length() + " bytes");
-									
-									if ( response.equals("COMM_ERROR") ) {
-										logger.error("Sagitarii is offline");
-									} else {
-										if ( preProcess( response ) ) {
-											logger.debug("starting new process");
-											TaskRunner tr = new TaskRunner( response, communicator, configurator);
-											runners.add(tr);
-											tr.start();
-											totalInstancesProcessed++;
+								if ( !havePendentCommand() ) {
+									logger.debug( "asking Sagitarii for tasks to process...");
+									response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
+											configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
+									if ( response.length() > 0 ) {
+										logger.debug("Sagitarii answered " + response.length() + " bytes");
+										
+										if ( response.equals("COMM_ERROR") ) {
+											logger.error("Sagitarii is offline");
+										} else {
+											if ( !specialCommand( response ) ) {
+												logger.debug("starting new process");
+												TaskRunner tr = new TaskRunner( response, communicator, configurator);
+												runners.add(tr);
+												tr.start();
+												totalInstancesProcessed++;
+											}
 										}
+									} else {
+										logger.debug("nothing to do for now");
 									}
 								} else {
-									logger.debug("nothing to do for now");
+									logger.debug("cannot request new tasks: flushing buffers...");
 								}
 							}
 						} catch ( Exception e ) {
@@ -291,60 +285,91 @@ public class Main {
 	}
 	
 	/**
-	 * Will check if Sagitarii sent a special command to this node
-	 * 
+	 * Check if there is a command waiting for task buffer is flushed 
 	 */
-	private static boolean preProcess( String response ) {
-		logger.debug("checking preprocess");
+	private static boolean havePendentCommand() {
 		if ( quiting ) {
-			// If we're here, is because the first call not finished (have tasks still running),
-			// so we'll try again
+			logger.debug("Teapot is quiting... do not process tasks anymore");
 			quit();
-			return false;
+			return true;
 		}
 		if ( restarting ) {
-			// If we're here, is because the first call not finished (have tasks still running), 
-			// so we'll try again
+			logger.debug("Teapot is restarting... do not process tasks anymore");
 			restart();
-			return false;
+			return true;
 		}
 		if ( reloading ) {
-			// If we're here, is because the first call not finished (have tasks still running), 
-			// so we'll try again
+			logger.debug("Teapot is reloading wrappers... do not process tasks for now");
 			reloadWrappers();
-			return false;
+			return true;
+		}
+		if ( cleaning ) {
+			logger.debug("Teapot is cleaning workspace... do not process tasks for now");
+			cleanUp();
+			return true;
 		}
 		
+		// No command is in process. Can free Teapot now...
+		return false;
+	}
+	
+	/**
+	 * Will check if Sagitarii sent a special command to this node
+	 * Returning TRUE will deny to run tasks ( may be a command or in flushing process )
+	 * 
+	 * WARNING: By returning FALSE ensure this "response" is a valid XML instance
+	 * 	or the XML parser will throw an error.
+	 * 
+	 */
+	private static boolean specialCommand( String response ) {
+		logger.debug("checking preprocess");
+		
+		// RESULT:
+		// FALSE = A valid XML instance. Will run a new task.
+		// TRUE  = A Sagitarii command or we don't want to run new tasks 
+		// 			even "response" is a valid XML instance
+		
 		if ( ( !response.equals( "NO_ANSWER" ) ) && ( !response.equals( "COMM_ERROR" ) ) && ( !response.equals( "" ) ) ) {
+			
 			if ( response.equals( "COMM_RESTART" ) ) {
 				logger.warn("get restart command from Sagitarii");
 				restart();
-			} else
+				return true;
+			} 
+				
 			if ( response.equals( "RELOAD_WRAPPERS" ) ) {
 				logger.warn("get reload wrappers command from Sagitarii");
 				reloadWrappers();
-			} else
+				return true;
+			} 
+				
 			if ( response.equals( "COMM_QUIT" ) ) {
 				logger.warn("get quit command from Sagitarii");
 				quit();
-			} else
+				return true;
+			} 
+				
 			if ( response.contains( "INFORM" ) ) {
 				String[] data = response.split("#");
 				logger.warn("Sagitarii is asking for Instance " + data[1] );
 				inform( data[1] );
-			} else
+				// No need to stop Teapot or flush buffers... just an information request
+				// Avoid consider this response as a valid XML instance by returning "TRUE"
+				return true;
+			} 
+				
 			if ( response.equals( "COMM_CLEAN_WORKSPACE" ) ) {
 				logger.warn("get clean workspace command from Sagitarii");
-				if (  getRunners().size() > 0 ) {
-					logger.warn("will not clean workspace. " + getRunners().size() + " tasks still runnig");
-				} else {
-					cleanUp();
-					logger.warn("workspace cleaned");
-				}
+				cleanUp();
+				return true;
 			} 
+			
+		} else {
+			logger.debug("invalid response from Sagitarii: " + response);
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 	
 	/**
@@ -408,7 +433,7 @@ public class Main {
 			logger.debug("Instance "+instanceSerial+" not found");
 		}
 		String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + 
-				"&instance=" + instanceSerial + "&status" + status;
+				"&instance=" + instanceSerial + "&status=" + status;
 		communicator.send("taskStatusReport", parameters);
 
 	}
