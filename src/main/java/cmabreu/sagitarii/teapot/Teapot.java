@@ -160,18 +160,19 @@ public class Teapot {
 		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
 		String classPathParam = "-Djava.library.path=" + configurator.getSystemProperties().getJriPath();
-
+		String workFolder = activation.getNamespace();
+		
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
 			String wrapperCommand = wrapperFolder + "r-wrapper.jar";
 			String scriptFile = wrapperFolder + activation.getCommand();
-			String workFolder = activation.getNamespace();
+			
 			
 			command = "java "+classPathParam+" -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrapperFolder;
 			
 		} else if ( activation.getExecutorType().equals("BASH") ) {
-			command = wrapperFolder + activation.getCommand();
+			command = wrapperFolder + activation.getCommand() + " " + workFolder + " " + wrapperFolder;
 		} else {
-			command = "java "+classPathParam+" -jar " + wrapperFolder + activation.getCommand() + " " + activation.getNamespace();
+			command = "java "+classPathParam+" -jar " + wrapperFolder + activation.getCommand() + " " + workFolder + " " + wrapperFolder;
 		}
 		return command;
 	}
