@@ -78,6 +78,9 @@ public class XMLParser {
 			doc.getDocumentElement().normalize();
 		} catch ( Exception e ) {
 			logger.error( e.getMessage() );
+			
+			System.out.println( xml );
+			
 			throw e;
 		}
 		
