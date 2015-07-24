@@ -194,6 +194,7 @@ public class Main {
 												runners.add(tr);
 												tr.start();
 												totalInstancesProcessed++;
+												logger.debug("new process started");
 											}
 										}
 									} else {
