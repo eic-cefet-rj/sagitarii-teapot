@@ -102,7 +102,7 @@ public class Teapot {
 				notifySagitarii( executor + ": output CSV data file sagi_output.txt is empty");
 				return false;
 			} else {
-				debug( executor + ": sagi_output.txt have " + file.length() + " lines.");
+				debug( executor + ": sagi_output.txt have " + file.length() + " bytes.");
 			}
 			BufferedReader br = new BufferedReader( new FileReader( file ) );
 			String header = br.readLine(); 					
