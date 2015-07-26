@@ -3,6 +3,7 @@ package cmabreu.sagitarii.teapot;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -414,7 +415,18 @@ public class Main {
 		}
 	}
 	
+	public static void notifySagitarii( String message ) {
+		logger.debug( "notify Sagitarii: " + message );
+		try {
+			String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
+			communicator.send("receiveErrorLog", parameters);
+		} catch ( Exception e ) {
+			logger.error("cannot notify Sagitarii: " + e.getMessage() );
+		}
+	}	
+	
 	private static void inform( String instanceSerial ) {
+		notifySagitarii("Sagitarii ask for Instance " + instanceSerial );
 		boolean found = false;
 		for ( TaskRunner tr : getRunners() ) {
 			if ( tr.getCurrentTask() != null ) {
@@ -424,14 +436,15 @@ public class Main {
 				}
 			}
 		}
-		
 		String status = "";
 		if ( found ) {
 			status = "RUNNING";
 			logger.debug("Instance "+instanceSerial+" is running");
+			notifySagitarii("Instance "+instanceSerial+" is running");
 		} else {
 			status = "NOT_FOUND";
 			logger.debug("Instance "+instanceSerial+" not found");
+			notifySagitarii("Instance "+instanceSerial+" not found");
 		}
 		String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + 
 				"&instance=" + instanceSerial + "&status=" + status;
@@ -448,7 +461,7 @@ public class Main {
 			logger.debug("cannot quit now. " + getRunners().size() + " tasks still runnig");
 		} else {
 			logger.debug("quit now.");
-			 System.exit(0);
+			System.exit(0);
 		}
 	}
 	
@@ -463,13 +476,16 @@ public class Main {
 		reloading = true;
 		if ( getRunners().size() > 0 ) {
 			logger.debug("cannot reload wrappers now. " + getRunners().size() + " tasks still runnig");
+			notifySagitarii("cannot reload wrappers now. " + getRunners().size() + " tasks still runnig");
 		} else {
 			logger.debug("reload all wrappers now.");
 			try {
 				RepositoryManager rm = new RepositoryManager( configurator );
 				rm.downloadWrappers();
 				logger.debug("all wrappers reloaded.");
+				notifySagitarii("all wrappers reloaded.");
 			} catch ( Exception e ) {
+				notifySagitarii("cannot reload wrappers: " + e.getMessage());
 				logger.error("cannot reload wrappers: " + e.getMessage() );
 			}
 			reloading = false;

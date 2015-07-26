@@ -36,6 +36,11 @@ public class Teapot {
 		if ( !s.equals("")) {
 			logger.debug( s );
 			execLog.add( s );
+			String executor = "STARTING";
+			if ( currentActivation != null ) {
+				executor = currentActivation.getExecutor();
+			}
+			notifySagitarii( "[" + executor + "] " +  s );
 		}
 	}
 	
@@ -75,7 +80,7 @@ public class Teapot {
 			try {
 				FileUtils.deleteDirectory( new File( currentActivation.getNamespace() ) ); 
 			} catch ( IOException e ) {
-				notifySagitarii( e.getMessage() );
+				notifySagitarii( "sanitization error: " + e.getMessage() );
 			}
 		}
 	}
@@ -119,7 +124,7 @@ public class Teapot {
 			} 
 			br.close();
 		} catch ( Exception e ) {
-			notifySagitarii( executor + ": " + e.getMessage() );
+			notifySagitarii( "validation error: " + executor + ": " + e.getMessage() );
 			return false;
 		}
 		
@@ -220,6 +225,7 @@ public class Teapot {
 	private void runTask( Activation activation ) {
 		String instanceId = activation.getInstanceSerial();
 		int order = activation.getOrder();
+		notifySagitarii("starting executor " + activation.getExecutor() );
 
 		debug("start task " + activation.getTaskId() + "(" + activation.getType() + ") " + activation.getExecutor() + " ("+ instanceId + " :: " + order + ")");
         
@@ -410,11 +416,11 @@ public class Teapot {
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
 			jobPool.addAll( acts );
-
+			notifySagitarii("start instance process of " + acts.size() + " activities.");
+			
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
 					currentActivation = act;
-					notifySagitarii("starting executor " + act.getExecutor() );
 					debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
