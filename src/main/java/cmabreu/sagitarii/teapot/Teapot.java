@@ -47,6 +47,11 @@ public class Teapot {
 	private void error( String s ) {
 		logger.error( s );
 		execLog.add( "[ERROR] " +  s );
+		String executor = "STARTING";
+		if ( currentActivation != null ) {
+			executor = currentActivation.getExecutor();
+		}
+		notifySagitarii( "[" + executor + "] " +  s );
 	}
 	
 	public Task getCurrentTask() {
@@ -147,12 +152,11 @@ public class Teapot {
 	
 	
 	public void notifySagitarii( String message ) {
-		debug( message );
 		try {
 			String parameters = "macAddress=" + tm.getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
 			comm.send("receiveErrorLog", parameters);
 		} catch ( Exception e ) {
-			error("cannot notify Sagitarii: " + e.getMessage() );
+			e.printStackTrace();
 		}
 	}
 	
@@ -415,10 +419,11 @@ public class Teapot {
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
 			jobPool.addAll( acts );
-			notifySagitarii("start instance process of " + acts.size() + " activities.");
+			//notifySagitarii("start instance process of " + acts.size() + " activities.");
 			boolean found = false;
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
+					
 					currentActivation = act;
 					found = true;
 					debug("execute first task in instance " + act.getInstanceSerial() );
@@ -438,7 +443,10 @@ public class Teapot {
 		} catch (Exception e) {
 			notifySagitarii( "error starting process: " + e.getMessage() );
 			error( e.getMessage() );
-			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
+			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() );
+			
+			e.printStackTrace();
+			
 		}
 	}
 
