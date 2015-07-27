@@ -412,15 +412,15 @@ public class Teapot {
 	public void process( String response ) throws Exception {
 		String instanceSerial = "";
 		try {
-			
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
 			jobPool.addAll( acts );
 			notifySagitarii("start instance process of " + acts.size() + " activities.");
-			
+			boolean found = false;
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
 					currentActivation = act;
+					found = true;
 					debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
@@ -432,11 +432,13 @@ public class Teapot {
 					break;
 				}
 			}
-			
+			if ( !found ) {
+				notifySagitarii("no activities found in instance ");
+			}
 		} catch (Exception e) {
+			notifySagitarii( "error starting process: " + e.getMessage() );
 			error( e.getMessage() );
 			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() ); 
-			notifySagitarii( e.getMessage() );
 		}
 	}
 

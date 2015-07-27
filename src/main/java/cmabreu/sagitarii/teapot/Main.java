@@ -191,11 +191,13 @@ public class Main {
 										} else {
 											if ( !specialCommand( response ) ) {
 												logger.debug("starting new process");
+												notifySagitarii("starting new process");
 												TaskRunner tr = new TaskRunner( response, communicator, configurator);
 												runners.add(tr);
 												tr.start();
 												totalInstancesProcessed++;
 												logger.debug("new process started");
+												
 											}
 										}
 									} else {

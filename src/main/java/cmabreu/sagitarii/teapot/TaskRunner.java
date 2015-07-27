@@ -18,6 +18,7 @@ package cmabreu.sagitarii.teapot;
  * 
  */
 
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,9 @@ public class TaskRunner extends Thread {
 	private String response;
 	private boolean active = true;
 	private String startTime;  
-	private long startTimeMillis;    
+	private long startTimeMillis;   
+	private Communicator communicator;
+	private Configurator configurator;
 
 	public String getStartTime() {
 		return startTime;
@@ -58,11 +61,24 @@ public class TaskRunner extends Thread {
 		return teapot.getCurrentActivation();
 	}
 	
+	
+	public void notifySagitarii( String message ) {
+		try {
+			String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
+			communicator.send("receiveErrorLog", parameters);
+		} catch ( Exception e ) {
+			logger.error("cannot notify Sagitarii: " + e.getMessage() );
+		}
+	}	
+	
 	public TaskRunner( String response, Communicator communicator, Configurator configurator ) {
+		this.communicator = communicator;
+		this.configurator = configurator;
 		this.teapot = new Teapot( communicator, configurator);
 		this.serial = UUID.randomUUID().toString().substring(0, 5).toUpperCase();
 		this.response = response;
 		setName("Teapot Task Runner " + this.serial );
+		notifySagitarii("new runner started as " + serial);
 	}
 	
 	public String getTime() {
@@ -90,7 +106,7 @@ public class TaskRunner extends Thread {
 		startTimeMillis = Calendar.getInstance().getTimeInMillis();
 		try {
 			logger.debug("[" + serial + "] runner thread start");
-			
+			notifySagitarii("thread " + serial + " started");
 			// Blocking call 
 			teapot.process( response );
 			
