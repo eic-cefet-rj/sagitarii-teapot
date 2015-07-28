@@ -63,6 +63,7 @@ public class TaskRunner extends Thread {
 	
 	
 	public void notifySagitarii( String message ) {
+		message = "[TASKRUNNER] " + message; 
 		try {
 			String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
 			communicator.send("receiveErrorLog", parameters);
@@ -78,7 +79,6 @@ public class TaskRunner extends Thread {
 		this.serial = UUID.randomUUID().toString().substring(0, 5).toUpperCase();
 		this.response = response;
 		setName("Teapot Task Runner " + this.serial );
-		notifySagitarii("new runner started as " + serial);
 	}
 	
 	public String getTime() {
@@ -107,9 +107,11 @@ public class TaskRunner extends Thread {
 		try {
 			logger.debug("[" + serial + "] runner thread start");
 			notifySagitarii("thread " + serial + " started");
+
 			// Blocking call 
 			teapot.process( response );
 			
+			notifySagitarii("thread " + serial + " finished");
 			logger.debug("[" + serial + "] runner thread end");
 		} catch ( Exception e ) {
 			logger.error("[" + serial + "] " + e.getMessage() );

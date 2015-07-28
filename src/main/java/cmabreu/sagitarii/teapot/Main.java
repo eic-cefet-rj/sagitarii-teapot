@@ -190,14 +190,14 @@ public class Main {
 											logger.error("Sagitarii is offline");
 										} else {
 											if ( !specialCommand( response ) ) {
-												logger.debug("starting new process");
-												notifySagitarii("starting new process");
+												logger.debug("starting new task");
+												notifySagitarii("starting new task...");
 												TaskRunner tr = new TaskRunner( response, communicator, configurator);
 												runners.add(tr);
 												tr.start();
 												totalInstancesProcessed++;
-												logger.debug("new process started");
-												
+												logger.debug("new task started");
+												notifySagitarii("new task started. Total: " + runners.size() );
 											}
 										}
 									} else {
@@ -419,6 +419,7 @@ public class Main {
 	
 	public static void notifySagitarii( String message ) {
 		logger.debug( "notify Sagitarii: " + message );
+		message = "[MAIN] " + message; 
 		try {
 			String parameters = "macAddress=" + configurator.getSystemProperties().getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
 			communicator.send("receiveErrorLog", parameters);
@@ -428,7 +429,7 @@ public class Main {
 	}	
 	
 	private static void inform( String instanceSerial ) {
-		notifySagitarii("Sagitarii ask for Instance " + instanceSerial );
+		notifySagitarii("Sagitarii is asking for Instance " + instanceSerial );
 		boolean found = false;
 		for ( TaskRunner tr : getRunners() ) {
 			if ( tr.getCurrentTask() != null ) {
