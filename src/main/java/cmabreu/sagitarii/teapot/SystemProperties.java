@@ -55,6 +55,11 @@ public class SystemProperties  {
 	private String classPath;
 	private String rHome;
 	private String jriPath;
+	private String localStorage;
+	
+	public String getLocalStorage() {
+		return localStorage;
+	}
 
     public OsType getOsType() {
     	return this.osType;
@@ -167,6 +172,10 @@ public class SystemProperties  {
 		File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath() );
 		teapotJarPath =  f.getAbsolutePath();
 		teapotRootFolder = teapotJarPath.substring(0, teapotJarPath.lastIndexOf( File.separator ) + 1).replace(File.separator, "/");
+		
+		localStorage = teapotRootFolder + "/storage";
+		File storage = new File( localStorage );
+		storage.mkdir();
 		
 		try {	
 			classPath = System.getenv("CLASSPATH");

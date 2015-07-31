@@ -106,6 +106,8 @@ public class Main {
 			logger.debug("R Home    : " + configurator.getSystemProperties().getrHome() );
 			logger.debug("JRI       : " + configurator.getSystemProperties().getJriPath() );
 			logger.debug("Path      : " + configurator.getSystemProperties().getPath() );
+			logger.debug("Task Limit: " + configurator.getActivationsMaxLimit() + " threads." );
+ 
 
 			logger.debug("cleaning workspace...");
 			cleanUp();
@@ -215,6 +217,7 @@ public class Main {
 					sendRunners();
 				}
 				
+				logger.debug("will sleep " + configurator.getPoolIntervalMilliSeconds() + "ms");
 				try {
 				    Thread.sleep( configurator.getPoolIntervalMilliSeconds() );
 				} catch( InterruptedException ex ) {

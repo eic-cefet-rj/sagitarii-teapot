@@ -299,10 +299,24 @@ public class Teapot {
 		File inputFolder = new File( act.getNamespace() + "/" + "inbox" );
 		inputFolder.mkdirs();
 	}
+
 	
-	/** 
-	 * Salva os dados iniciais em uma pasta para trabalho.
-	 */
+	private void download ( FileUnity file, Activation act, Downloader dl ) throws Exception {
+		String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
+		
+		debug("check local storage");
+		LocalStorage ls = LocalStorage.getInstance( configurator );
+		if ( ls.copy( file, target ) ) {
+			debug("file " + file.getName() + " exists in local storage");
+
+		} else {
+			debug("file " + file.getName() + " not found in local storage. downloading..." );
+			ls.downloadAndCopy( file, target, dl);
+		}
+		
+	}
+	
+	
 	private void saveInputData( Activation act ) throws Exception {
 		debug("start data preparation for task " + act.getExecutor() + " (Activity: " + act.getActivitySerial() + "/ Task: " + act.getTaskId() + ")" );
 		if ( act.getSourceData().size() < 2 ) {
@@ -355,11 +369,16 @@ public class Teapot {
 				for ( FileUnity file : act.getFiles() ) {
 					debug("need file " + file.getName() + " (id " + file.getId() + ") for attribute " + file.getAttribute() +
 							" of table " + file.getSourceTable() );
-					String url = configurator.getHostURL() + "/getFile?idFile="+ file.getId()+"&macAddress=" + configurator.getSystemProperties().getMacAddress();
-					String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 					
-					debug("downloading " + file.getName() );
-					dl.download(url, target, true);
+					download(file, act, dl);
+					
+					File fil = new File( act.getNamespace() + "/" + "inbox" + "/" + file.getName() );
+					if ( fil.exists() ) {
+						debug( "file " + file.getName() + " downloaded.");
+					} else {
+						error( "cannot find file " + file.getName() + " after download.");
+					}
+					
 				}
 			} else {
 				debug("no need to download files.");

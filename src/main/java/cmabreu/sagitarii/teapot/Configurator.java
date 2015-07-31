@@ -211,6 +211,7 @@ public class Configurator {
 				hostURL = getTagValue("hostURL", mpElement);
 				CSVDelimiter = getTagValue("CSVDelimiter", mpElement).charAt(0);
 				poolIntervalMilliSeconds = Integer.valueOf( getTagValue("poolIntervalMilliSeconds", mpElement) );
+				
 				activationsMaxLimit = Integer.valueOf( getTagValue("activationsMaxLimit", mpElement) );
 				storageHost = getTagValue("storageHost", mpElement);
 				rPath = getTagValue("rPath", mpElement);
@@ -225,7 +226,7 @@ public class Configurator {
 				
 				if ( enforceTaskLimitToCores ) {
 					useSpeedEqualizer = false;
-					poolIntervalMilliSeconds = systemProperties.getAvailableProcessors();
+					activationsMaxLimit = systemProperties.getAvailableProcessors();
 				}
 				
 				useProxy = Integer.parseInt( getValue("proxy", "useProxy") );
