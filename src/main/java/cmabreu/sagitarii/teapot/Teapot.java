@@ -305,7 +305,7 @@ public class Teapot {
 		String target = act.getNamespace() + "/" + "inbox" + "/" + file.getName();
 		
 		debug("check local storage");
-		LocalStorage ls = LocalStorage.getInstance( configurator );
+		LocalStorage ls = new LocalStorage( comm, configurator, act );
 		if ( ls.copy( file, target ) ) {
 			debug("file " + file.getName() + " exists in local storage");
 

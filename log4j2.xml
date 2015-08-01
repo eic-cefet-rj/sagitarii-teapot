@@ -14,6 +14,15 @@
 	
 	<loggers>
 	
+		<Logger name="cmabreu.sagitarii.teapot.StorageLocker" level="error" additivity="false"> 
+			<appender-ref ref="Console"/> 
+		</Logger>
+
+		<Logger name="cmabreu.sagitarii.teapot.LocalStorage" level="error" additivity="false"> 
+			<appender-ref ref="Console"/> 
+		</Logger>
+
+
 		<Logger name="cmabreu.sagitarii.executors.RExecutor" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
