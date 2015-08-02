@@ -33,6 +33,11 @@ public class LocalStorage {
 		}
 	}
 	
+	private void error( String s ) {
+		logger.error( s );
+		notifySagitarii( s );
+	}
+	
 	public void notifySagitarii( String message ) {
 		String executor = "STARTING";
 		executor = act.getExecutor();
@@ -77,8 +82,18 @@ public class LocalStorage {
 			try {
 				debug("will download "+file.getName()+" from Sagitarii");
 				dl.download(url, targetFile, true);
+				debug("download of file "+file.getName()+" done. checking...");
+				
+				trgt = new File( targetFile ); 
+				if ( !trgt.exists() ) {
+					error("error downloading file " + file.getName() + " from Sagitarii: FILE NOT FOUND");
+				} else {
+					debug("file "+file.getName()+" found at local");
+				}
+				
+				
 			} catch ( Exception e ) {
-				//
+				error("error downloading file " + file.getName() + " from Sagitarii: " + e.getMessage() );
 			}
 			debug("will release the file lock for " + file.getName() );
 			locker.releaseFileLock(file);
@@ -90,15 +105,28 @@ public class LocalStorage {
 		}
 	}
 	
-	public boolean copy( FileUnity file, String dest ) {
+	private boolean copy( FileUnity file, String dest ) {
 		String source = getLocation() + "/" + file.getId() + "/" + file.getName();
+		debug("will copy " + file.getName() + " to " + dest);
 		try {
 			File src = new File(source);
 			File trgt = new File(dest);
 			if ( src.exists() ) {
 			    Files.copy( src.toPath(), trgt.toPath() );
-			    return true;
+			    if ( !trgt.exists() ) {
+					error("file " + file.getName() + " NOT FOUND after copy to " + dest );
+					return false;
+			    } else {
+			    	if( src.length() != trgt.length()  ) {
+						error("target file size differ from source file size" );
+						return false;
+			    	} else {
+						debug("copy " + file.getName() + " to " + dest + ": successful");
+				    	return true;
+			    	}
+			    }
 			} else {
+				error("file " + file.getName() + " NOT FOUND at source folder " + source );
 				return false;
 			}
 		} catch ( Exception e ) {
