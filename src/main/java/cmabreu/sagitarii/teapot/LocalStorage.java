@@ -54,33 +54,27 @@ public class LocalStorage {
 		String targetPath = getLocation() + "/" + file.getId() + "/";
 		String targetFile = targetPath + file.getName();
 		
-		// is other activation already downloading this file?
-		
-		boolean locked = locker.isFileLocked(file);
-		if ( locked ) {
-			debug("waiting other thread to download " + file.getName() );
-		}
-		
-		while ( locked ) {
-			locked = locker.isFileLocked(file);
+		debug("will request file lock for " + file.getName() );
+		while ( !locker.requestFileLock( file ) ) {
 			try {
-				Thread.currentThread().wait(1000);
+				Thread.currentThread().wait(500);
 			} catch ( Exception ignored ) {
 				
 			}
 		}
 
-		debug("free to proceed. file lock released or not found for " + file.getName() );
+		debug("file lock for file "+file.getName()
+				+ " given to task "+act.getTaskId() + ". copy or download..." );
 
-		// try to copy from local repo ( someone finished download )
-		if ( !copy( file, dest) ) {
-			// if can't, try to download from sagitarii...
-			debug("will request a file lock for " + file.getName() );
-			locker.requestFileLock( file );
+		String source = getLocation() + "/" + file.getId() + "/" + file.getName();
+		File src = new File(source);
+		
+		if ( !src.exists() ) {
+			debug("will download "+file.getName()+" from Sagitarii");
 			File trgt = new File( targetPath );
 			trgt.mkdir();
 			try {
-				debug("will download "+file.getName()+" from Sagitarii");
+				
 				dl.download(url, targetFile, true);
 				debug("download of file "+file.getName()+" done. checking...");
 				
@@ -95,17 +89,19 @@ public class LocalStorage {
 			} catch ( Exception e ) {
 				error("error downloading file " + file.getName() + " from Sagitarii: " + e.getMessage() );
 			}
-			debug("will release the file lock for " + file.getName() );
-			locker.releaseFileLock(file);
-			// ... and copy from local repo
-			return copy( file, dest);
+			
 		} else {
-			debug("file "+file.getName()+" already downloaded by other task. will use from local storage");
-			return true;
+			debug("file "+file.getName()+" already downloaded by other task. using local storage");
 		}
+		
+		boolean result = copy( file, dest);
+		debug("will release the file lock for " + file.getName() );
+		locker.releaseFileLock(file);
+		return result;
+
 	}
 	
-	private boolean copy( FileUnity file, String dest ) {
+	private synchronized boolean copy( FileUnity file, String dest ) {
 		String source = getLocation() + "/" + file.getId() + "/" + file.getName();
 		debug("will copy " + file.getName() + " to " + dest);
 		try {

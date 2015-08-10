@@ -27,16 +27,16 @@ public class StorageLocker {
 		return file.getSourceTable() + "." + file.getName() + "." + String.valueOf( file.getId() );
 	}
 	
-	public synchronized void requestFileLock( FileUnity file ) {
-		logger.debug("request file lock: " + file.getName() );
+	public synchronized boolean requestFileLock( FileUnity file ) {
 		if ( isFileLocked( file ) ) {
-			logger.debug("already locked: " + file.getName() );
+			return false;
 		} else {
 			lockers.put( getUuid( file ), file.getId() );
+			return true;
 		}
 	}
 	
-	public synchronized boolean isFileLocked( FileUnity file ) {
+	private synchronized boolean isFileLocked( FileUnity file ) {
 		return lockers.containsValue( file.getId() );
 	}
 	
