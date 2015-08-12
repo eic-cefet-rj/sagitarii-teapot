@@ -103,7 +103,7 @@ public class LocalStorage {
 	
 	private synchronized boolean copy( FileUnity file, String dest ) {
 		String source = getLocation() + "/" + file.getId() + "/" + file.getName();
-		debug("will copy " + file.getName() + " to " + dest);
+		debug("will copy " + source + " to " + dest);
 		try {
 			File src = new File(source);
 			File trgt = new File(dest);
@@ -126,6 +126,7 @@ public class LocalStorage {
 				return false;
 			}
 		} catch ( Exception e ) {
+			error( "critical error when copying file " + file.getName() + ": " + e.getMessage() );
 			return false;
 		}
 	}
