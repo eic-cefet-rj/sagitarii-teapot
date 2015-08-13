@@ -180,7 +180,10 @@ public class Main {
 					if ( !paused ) {
 						String response = "NO_DATA";
 						try {
+							LoadEqualizer.equalize( configurator, runners.size() );
+							
 							if ( runners.size() < configurator.getActivationsMaxLimit() ) {
+
 								if ( !havePendentCommand() ) {
 									logger.debug( "asking Sagitarii for tasks to process...");
 									response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
@@ -208,6 +211,8 @@ public class Main {
 								} else {
 									logger.debug("cannot request new tasks: flushing buffers...");
 								}
+							} else {
+								//
 							}
 						} catch ( Exception e ) {
 							logger.error( "process error: " + e.getMessage() );
@@ -282,6 +287,7 @@ public class Main {
 		data.append( generateJsonPair( "totalMemory" , String.valueOf( configurator.getSystemProperties().getTotalMemory() ) ) + "," );
 		data.append( generateJsonPair( "totalDiskSpace" , String.valueOf( configurator.getSystemProperties().getTotalDiskSpace() ) ) + "," );
 		data.append( generateJsonPair( "freeDiskSpace" , String.valueOf( configurator.getSystemProperties().getFreeDiskSpace() ) ) + "," );
+		data.append( generateJsonPair( "maximunLimit" , String.valueOf( configurator.getActivationsMaxLimit() ) ) + "," );
 		data.append( addArray("data", sb.toString() ) ); 
 		data.append("}");			
 		

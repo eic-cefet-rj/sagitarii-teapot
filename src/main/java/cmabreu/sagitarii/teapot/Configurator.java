@@ -117,6 +117,10 @@ public class Configurator {
 		return poolIntervalMilliSeconds;
 	}
 
+	public void setActivationsMaxLimit(int activationsMaxLimit) {
+		this.activationsMaxLimit = activationsMaxLimit;
+	}
+	
 	public int getActivationsMaxLimit() {
 		return activationsMaxLimit;
 	}
