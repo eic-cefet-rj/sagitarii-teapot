@@ -4,14 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LoadEqualizer {
-	private static int originalMaxLimit = 0;
-	private static final int MEDIUM_SIZE = 10;
+	private static final int TASKS_MEDIUM_SIZE = 10;
+	private static final int LOADS_MEDIUM_SIZE = 50;
 	private static List<Integer> mediumLimit = new ArrayList<Integer>();
+	private static List<Double> mediumLoad = new ArrayList<Double>();
+	private static int defaultMaxLimit = 0;
 	
+	public static double getLoadsMedium( double value ) {
+		mediumLoad.add( value );
+		if ( mediumLoad.size() > LOADS_MEDIUM_SIZE ) {
+			mediumLoad.remove(0);
+		}
+		Double totalValue = 0.0;
+		for ( Double val : mediumLoad ) {
+			totalValue = totalValue + val;
+		}
+		return totalValue / mediumLoad.size();
+	}
 	
-	public static int getMedium( int value ) {
+	public static int getTasksMedium( int value ) {
 		mediumLimit.add( value );
-		if ( mediumLimit.size() > MEDIUM_SIZE ) {
+		if ( mediumLimit.size() > TASKS_MEDIUM_SIZE ) {
 			mediumLimit.remove(0);
 		}
 
@@ -20,41 +33,67 @@ public class LoadEqualizer {
 			totalValue = totalValue + val;
 		}
 		
-		System.out.println("Value: " + value + " Size: " + mediumLimit.size() + " Total: " + totalValue + " Medium: " + totalValue / mediumLimit.size() );
-		
 		return totalValue / mediumLimit.size();
 	}
 	
+	public static boolean tooHigh( double load ) {
+		return load >=95;
+	}
+
+	public static boolean tooLow( double load ) {
+		return load < 90;
+	}
+
+	public static boolean outOfBounds( double cpuLoad, double load ) {
+		double value = (load - cpuLoad);
+		return ( (value < -5) || (value > 5) );
+	}
+	
 	public synchronized static void equalize( Configurator configurator, int totalTasksRunning ) {
-		
-		if ( totalTasksRunning == 0 ) {
-			return;
-		}
-		
-		double load = configurator.getSystemProperties().getCpuLoad();
+		double cpuLoad = configurator.getSystemProperties().getCpuLoad();
 		boolean enforceTaskLimitToCores = configurator.enforceTaskLimitToCores();
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
-		
-		if ( originalMaxLimit == 0) {
-			originalMaxLimit = activationsMaxLimit;
+
+		if ( defaultMaxLimit == 0 ) {
+			defaultMaxLimit = activationsMaxLimit;
 		}
 		
-		if ( enforceTaskLimitToCores ) {
+
+		if ( enforceTaskLimitToCores || (totalTasksRunning == 0) ) {
+			System.out.println("no tasks running");
 			return;
 		}
 
-		if ( load < 97 ) {
+		double load = getLoadsMedium(cpuLoad);
+		//double load = cpuLoad;
+		//int oldActivationsMaxLimit = activationsMaxLimit;
+		
+		System.out.print("Load: " + load + " : ");
+		
+		boolean acceptable = false;
+		
+		if ( tooHigh(load) && ( activationsMaxLimit > defaultMaxLimit ) ) {
+			System.out.print("too high: " +  outOfBounds(cpuLoad,load) );
+			activationsMaxLimit--;
+		} else 
+		
+		if ( tooLow(load) ) {
+			System.out.print("too low: " + outOfBounds(cpuLoad,load) );
 			activationsMaxLimit++;
 		} else {
-			activationsMaxLimit--;
+			acceptable = true;
+			System.out.println("acceptable: " + outOfBounds(cpuLoad,load) );
 		}
-		
-		int finalValue = getMedium(activationsMaxLimit);
-		if( load < 50 ) {
-			finalValue = activationsMaxLimit;
+
+		if ( !acceptable ) {
+			int finalValue = getTasksMedium(activationsMaxLimit);
+			if( load < 50 ) {
+				finalValue = activationsMaxLimit;
+			}
+			configurator.setActivationsMaxLimit( finalValue );
+	
+			System.out.println(" AML: " + finalValue );
 		}
-		
-		configurator.setActivationsMaxLimit( finalValue );
 		
 	}
 }
