@@ -27,8 +27,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -56,7 +58,20 @@ public class SystemProperties  {
 	private String rHome;
 	private String jriPath;
 	private String localStorage;
-	
+	private List<Double> mediumLoad = new ArrayList<Double>();
+	private final int LOADS_MEDIUM_SIZE = 30;
+
+	private double getLoadsMedium( double value ) {
+		mediumLoad.add( value );
+		if ( mediumLoad.size() > LOADS_MEDIUM_SIZE ) {
+			mediumLoad.remove(0);
+		}
+		Double totalValue = 0.0;
+		for ( Double val : mediumLoad ) {
+			totalValue = totalValue + val;
+		}
+		return totalValue / mediumLoad.size();
+	}	
 	public String getLocalStorage() {
 		return localStorage;
 	}
@@ -66,6 +81,7 @@ public class SystemProperties  {
     }
     
     private double getProcessCpuLoad() {
+    	double finalValue = 0.0;
     	try {
 	        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 	        ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
@@ -74,10 +90,11 @@ public class SystemProperties  {
 	        Attribute att = (Attribute)list.get(0);
 	        Double value = (Double)att.getValue();
 	        if (value == -1.0) return 0; 
-	        return ((int)(value * 1000) / 10.0);
+	        finalValue = ((int)(value * 1000) / 10.0);
     	} catch (MalformedObjectNameException | ReflectionException | InstanceNotFoundException e) {
-    		return 0;
+    		//
     	}
+    	return Math.ceil( getLoadsMedium( finalValue ) );
     }    
 
     private InetAddress getFirstNonLoopbackAddress(boolean preferIpv4, boolean preferIPv6) throws SocketException {

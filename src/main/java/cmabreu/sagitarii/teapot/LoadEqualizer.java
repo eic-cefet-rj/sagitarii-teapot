@@ -1,40 +1,11 @@
 package cmabreu.sagitarii.teapot;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoadEqualizer {
-	private static final int TASKS_MEDIUM_SIZE = 10;
-	private static final int LOADS_MEDIUM_SIZE = 50;
-	private static List<Integer> mediumLimit = new ArrayList<Integer>();
-	private static List<Double> mediumLoad = new ArrayList<Double>();
+	private static final int TESTS_BEFORE_CHANGE = 30;
+	
 	private static int defaultMaxLimit = 0;
-	
-	public static double getLoadsMedium( double value ) {
-		mediumLoad.add( value );
-		if ( mediumLoad.size() > LOADS_MEDIUM_SIZE ) {
-			mediumLoad.remove(0);
-		}
-		Double totalValue = 0.0;
-		for ( Double val : mediumLoad ) {
-			totalValue = totalValue + val;
-		}
-		return totalValue / mediumLoad.size();
-	}
-	
-	public static int getTasksMedium( int value ) {
-		mediumLimit.add( value );
-		if ( mediumLimit.size() > TASKS_MEDIUM_SIZE ) {
-			mediumLimit.remove(0);
-		}
-
-		int totalValue = 0;
-		for ( int val : mediumLimit ) {
-			totalValue = totalValue + val;
-		}
-		
-		return totalValue / mediumLimit.size();
-	}
+	private static int testCount = 0;
 	
 	public static boolean tooHigh( double load ) {
 		return load >=95;
@@ -44,16 +15,15 @@ public class LoadEqualizer {
 		return load < 90;
 	}
 
-	public static boolean outOfBounds( double cpuLoad, double load ) {
-		double value = (load - cpuLoad);
-		return ( (value < -5) || (value > 5) );
-	}
-	
 	public synchronized static void equalize( Configurator configurator, int totalTasksRunning ) {
-		double cpuLoad = configurator.getSystemProperties().getCpuLoad();
+		double load = configurator.getSystemProperties().getCpuLoad();
 		boolean enforceTaskLimitToCores = configurator.enforceTaskLimitToCores();
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
 
+		boolean tooLow = false;
+		boolean tooHigh = false;
+		
+		
 		if ( defaultMaxLimit == 0 ) {
 			defaultMaxLimit = activationsMaxLimit;
 		}
@@ -64,35 +34,39 @@ public class LoadEqualizer {
 			return;
 		}
 
-		double load = getLoadsMedium(cpuLoad);
-		//double load = cpuLoad;
-		//int oldActivationsMaxLimit = activationsMaxLimit;
-		
-		System.out.print("Load: " + load + " : ");
+		System.out.print("Load: " + load + "% : ");
 		
 		boolean acceptable = false;
 		
-		if ( tooHigh(load) && ( activationsMaxLimit > defaultMaxLimit ) ) {
-			System.out.print("too high: " +  outOfBounds(cpuLoad,load) );
-			activationsMaxLimit--;
+		if ( tooHigh(load) ) {
+			System.out.print("too high" );
+			tooHigh = true;
 		} else 
 		
 		if ( tooLow(load) ) {
-			System.out.print("too low: " + outOfBounds(cpuLoad,load) );
-			activationsMaxLimit++;
+			System.out.print("too low" );
+			tooLow = true;
 		} else {
 			acceptable = true;
-			System.out.println("acceptable: " + outOfBounds(cpuLoad,load) );
+			testCount = 0;
+			System.out.print("acceptable" );
 		}
 
-		if ( !acceptable ) {
-			int finalValue = getTasksMedium(activationsMaxLimit);
-			if( load < 50 ) {
-				finalValue = activationsMaxLimit;
-			}
-			configurator.setActivationsMaxLimit( finalValue );
-	
-			System.out.println(" AML: " + finalValue );
+		testCount++;
+		if ( !acceptable && ( testCount >= TESTS_BEFORE_CHANGE ) ) {
+				if ( tooLow ) {
+					activationsMaxLimit++;
+				}
+				if ( tooHigh && ( activationsMaxLimit > 1 ) ) {
+					activationsMaxLimit--;
+				}
+				
+				testCount = 0;
+				configurator.setActivationsMaxLimit( activationsMaxLimit );
+		
+				System.out.println("    AML set to: " + activationsMaxLimit );
+		} else {
+			System.out.println("     Nothing was changed: " + testCount );
 		}
 		
 	}
