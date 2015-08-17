@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-	<groupId>cmabreu</groupId>
+	<groupId>br.cefetrj</groupId>
 	<artifactId>teapot</artifactId>
 	<version>1.0.125</version>
 	<packaging>jar</packaging>
@@ -126,17 +126,21 @@
 			<id>icemagno</id>
 		</developer>
 	</developers>	
+	
 	<organization>
-		<name>Carlos Magno Oliveira de Abreu</name>
-		<url>http://www.cmabreu.com.br</url>
+		<name>Centro Federal de Educação Tecnológica Celso Suckow da Fonseca</name>
+		<url>http://www.cefet-rj.br</url>
 	</organization>
+	
 	<issueManagement>
 		<system>Github</system>
-		<url>https://github.com/icemagno/teapot/issues</url>
+		<url>https://github.com/eic-cefet-rj/sagitarii-teapot/issues</url>
 	</issueManagement>
+	
 	<ciManagement>
 		<system>Github</system>
-		<url>https://github.com/icemagno/teapot</url>
+		<url>https://github.com/eic-cefet-rj/sagitarii-teapot</url>
 	</ciManagement>
 	
+	<url>http://eic-cefet-rj.github.io/sagitarii/</url>
 </project>

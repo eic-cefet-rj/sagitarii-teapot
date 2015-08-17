@@ -14,64 +14,64 @@
 	
 	<loggers>
 	
-		<Logger name="cmabreu.sagitarii.teapot.StorageLocker" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.StorageLocker" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.LocalStorage" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.LocalStorage" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
 
-		<Logger name="cmabreu.sagitarii.executors.RExecutor" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.executors.RExecutor" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.executors.BashExecutor" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.executors.BashExecutor" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Client" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.comm.Client" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.SpeedEqualizer" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.SpeedEqualizer" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.TaskRunner" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.TaskRunner" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.RepositoryManager" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.RepositoryManager" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Configurator" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.Configurator" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.XMLParser" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.XMLParser" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Downloader" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.comm.Downloader" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.comm.Uploader" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.comm.Uploader" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 		
-		<Logger name="cmabreu.sagitarii.teapot.Task" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.Task" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Teapot" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.Teapot" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="cmabreu.sagitarii.teapot.Main" level="debug" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.Main" level="debug" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 
