@@ -68,13 +68,16 @@ public class Main {
 
 	
 	private static List<String> decodeResponse( String encodedResponse ) {
+		logger.debug("decoding response ...");
 		String[] responses = encodedResponse.replace("[", "").replace("]", "").replace(" ", "").split(",");
 		List<String> resp = new ArrayList<String>();
+		logger.debug("response package contains " + resp.size() + " instances" );
 		for ( String hexResp : responses ) {
 			byte[] compressedResp = ZipUtil.toByteArray( hexResp );
 			String inflatedResp = ZipUtil.decompress(compressedResp);
 			resp.add( inflatedResp );
 		}
+		logger.debug("done");
 		return resp;
 	}
 
@@ -200,9 +203,14 @@ public class Main {
 								if ( !havePendentCommand() ) {
 									logger.debug( "asking Sagitarii for tasks to process...");
 									
+									int packageSize = configurator.getActivationsMaxLimit() - runners.size();
+									if ( packageSize < 1 ) {
+										packageSize = 1;
+									}
+									
 									response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
 											configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory(),
-											configurator.getActivationsMaxLimit() );
+											packageSize );
 									
 									if ( response.length() > 0 ) {
 										logger.debug("Sagitarii answered " + response.length() + " bytes");

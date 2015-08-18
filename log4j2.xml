@@ -14,6 +14,10 @@
 	
 	<loggers>
 	
+		<Logger name="cmabreu.sagitarii.teapot.LoadEqualizer" level="debug" additivity="false"> 
+			<appender-ref ref="Console"/> 
+		</Logger>
+
 		<Logger name="br.cefetrj.sagitarii.teapot.StorageLocker" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
