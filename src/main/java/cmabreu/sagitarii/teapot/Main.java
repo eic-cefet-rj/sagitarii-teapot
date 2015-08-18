@@ -66,6 +66,19 @@ public class Main {
 		}
 	}
 
+	
+	private static List<String> decodeResponse( String encodedResponse ) {
+		String[] responses = encodedResponse.replace("[", "").replace("]", "").replace(" ", "").split(",");
+		List<String> resp = new ArrayList<String>();
+		for ( String hexResp : responses ) {
+			byte[] compressedResp = ZipUtil.toByteArray( hexResp );
+			String inflatedResp = ZipUtil.decompress(compressedResp);
+			resp.add( inflatedResp );
+		}
+		return resp;
+	}
+
+	
 	/**
 	 * Teapot entry point
 	 * 
@@ -186,8 +199,11 @@ public class Main {
 
 								if ( !havePendentCommand() ) {
 									logger.debug( "asking Sagitarii for tasks to process...");
+									
 									response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
-											configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory() );
+											configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory(),
+											configurator.getActivationsMaxLimit() );
+									
 									if ( response.length() > 0 ) {
 										logger.debug("Sagitarii answered " + response.length() + " bytes");
 										
@@ -195,19 +211,23 @@ public class Main {
 											logger.error("Sagitarii is offline");
 										} else {
 											if ( !specialCommand( response ) ) {
-												logger.debug("starting new task");
-												notifySagitarii("starting new task...");
-												TaskRunner tr = new TaskRunner( response, communicator, configurator);
-												runners.add(tr);
-												tr.start();
-												totalInstancesProcessed++;
-												logger.debug("new task started");
-												notifySagitarii("new task started. Total: " + runners.size() );
+												List<String> responses = decodeResponse( response );
+												for ( String decodedResponse : responses ) {
+													logger.debug("starting new task");
+													notifySagitarii("starting new task...");
+													TaskRunner tr = new TaskRunner( decodedResponse, communicator, configurator);
+													runners.add(tr);
+													tr.start();
+													totalInstancesProcessed++;
+													logger.debug("new task started");
+													notifySagitarii("new task started. Total: " + runners.size() );
+												}
 											}
 										}
 									} else {
 										logger.debug("nothing to do for now");
 									}
+									
 								} else {
 									logger.debug("cannot request new tasks: flushing buffers...");
 								}

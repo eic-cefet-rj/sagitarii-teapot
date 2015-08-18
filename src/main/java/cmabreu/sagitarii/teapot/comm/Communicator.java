@@ -86,12 +86,12 @@ public class Communicator  {
 	* Announce this node and request for more tasks do process
 	* Sagitarii can send a special command instead (quit, restart, reload wrappers, etc...)
 	*/
-	public synchronized String announceAndRequestTask( Double cpuLoad, Long freeMemory, Long totalMemory ) {
+	public synchronized String announceAndRequestTask( Double cpuLoad, Long freeMemory, Long totalMemory, int packageSize ) {
 		String parameters = "soName=" + soName + "&localIpAddress=" + localIpAddress + 
 				"&machineName=" + machineName + "&macAddress=" + macAddress + "&cpuLoad=" + cpuLoad +
 				"&availableProcessors=" + availableProcessors + "&soFamily=" + soFamily +
 				"&javaVersion=" + java + "&maxAllowedTasks=" + maxAllowedTasks + "&freeMemory=" + freeMemory +
-				"&totalMemory=" + totalMemory;
+				"&totalMemory=" + totalMemory + "&packageSize=" + packageSize;
 		
 		return send( "announce", parameters);
 	}
