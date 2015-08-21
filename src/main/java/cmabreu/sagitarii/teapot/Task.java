@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cmabreu.sagitarii.executors.BashExecutor;
@@ -33,8 +34,25 @@ public class Task {
 	private TaskStatus status;
 	private int exitCode;
 	private Activation activation;
+	private Date realStartTime;
+	private Date realFinishTime;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 
+	public Date getRealFinishTime() {
+		return realFinishTime;
+	}
+	
+	public Date getRealStartTime() {
+		return realStartTime;
+	}
+	
+	public void setRealFinishTime(Date realFinishTime) {
+		this.realFinishTime = realFinishTime;
+	}
+	
+	public void setRealStartTime(Date realStartTime) {
+		this.realStartTime = realStartTime;
+	}
 	
 	private void error( String s ) {
 		execLog.add( s );

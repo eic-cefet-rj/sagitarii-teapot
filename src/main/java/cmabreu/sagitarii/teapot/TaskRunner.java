@@ -114,6 +114,8 @@ public class TaskRunner extends Thread {
 			notifySagitarii("thread " + serial + " finished");
 			logger.debug("[" + serial + "] runner thread end");
 		} catch ( Exception e ) {
+			e.printStackTrace();
+			
 			logger.error("[" + serial + "] " + e.getMessage() );
 		}
 		active = false;

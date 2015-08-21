@@ -31,9 +31,6 @@ public class Uploader {
 		this.gf = gf;
 	}
 	
-	/**
-	 * Envia um arquivo CSV ao servidor
-	 */
 	public void uploadCSV(String fileName, String relationName, String experimentSerial, 
 			String filesFolderName, Task task, SystemProperties tm) throws Exception {
 		

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,11 +73,17 @@ public class Main {
 		String[] responses = encodedResponse.replace("[", "").replace("]", "").replace(" ", "").split(",");
 		List<String> resp = new ArrayList<String>();
 		logger.debug("response package contains " + resp.size() + " instances" );
+		
+		/*
 		for ( String hexResp : responses ) {
 			byte[] compressedResp = ZipUtil.toByteArray( hexResp );
 			String inflatedResp = ZipUtil.decompress(compressedResp);
 			resp.add( inflatedResp );
 		}
+		*/
+		
+		resp = new ArrayList<String>( Arrays.asList( responses ) ); 
+		
 		logger.debug("done");
 		return resp;
 	}

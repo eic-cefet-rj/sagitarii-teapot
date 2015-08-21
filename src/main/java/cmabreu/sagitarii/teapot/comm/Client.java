@@ -65,12 +65,17 @@ public class Client {
 		String fragment = "";
 		String taskId = "";
 		String exitCode = "0";
+		String startTimeMillis = "";
+		String finishTimeMillis = "";
+		
 		if ( task != null ) {
 			instanceSerial = task.getActivation().getInstanceSerial();
 			activity = task.getActivation().getActivitySerial();
 			fragment = task.getActivation().getFragment();
 			exitCode = String.valueOf( task.getExitCode() );
 			taskId = task.getActivation().getTaskId();
+			startTimeMillis = task.getRealStartTime().toString();
+			finishTimeMillis = task.getRealFinishTime().toString();
 		}			
 		
 		getSessionKey();
@@ -80,6 +85,7 @@ public class Client {
 		
 		xml.append("<session macAddress=\""+macAddress+"\" instance=\""+instanceSerial+
 				"\" activity=\""+activity+"\"  taskId=\""+taskId+"\" exitCode=\""+exitCode+"\" fragment=\""+fragment + 
+				"\" startTime=\""+startTimeMillis + "\" finishTime=\""+finishTimeMillis +
 				"\" experiment=\""+experimentSerial + "\" id=\""+sessionSerial+"\" targetTable=\""+targetTable+"\">\n");
 		
 		

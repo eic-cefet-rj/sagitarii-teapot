@@ -1,48 +1,34 @@
 package cmabreu.sagitarii.teapot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LoadEqualizer {
 	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.LoadEqualizer" ); 
 	private static final int TESTS_BEFORE_CHANGE = 3;
 	private static final int ACCEPTABLE_UPPER_LIMIT = 95;
 	private static final int ACCEPTABLE_LOWER_LIMIT = 90;
-	private static final int LOADS_MEDIUM_SIZE = 50;
-	private static int INITIAL_TASK_LIMIT = 0;
-	private static List<Double> mediumLoad = new ArrayList<Double>();
+	private static final int MAXIMUN_RAM_TO_USE = 90;
 	
+	private static int INITIAL_TASK_LIMIT = 0;
 	private static int defaultMaxLimit = 0;
 	private static int testCount = 0;
 	private static int noTaskCheckCount = 0;
 	
-	public static boolean tooHigh( double load ) {
-		return load >= ACCEPTABLE_UPPER_LIMIT;
+	public static boolean tooHigh( double load, double ramLoad ) {
+		boolean ramBelowLimit = ( ramLoad < MAXIMUN_RAM_TO_USE );
+		return ( load >= ACCEPTABLE_UPPER_LIMIT ) && ramBelowLimit;
 	}
 
-	public static boolean tooLow( double load ) {
-		return load < ACCEPTABLE_LOWER_LIMIT;
+	public static boolean tooLow( double load, double ramLoad ) {
+		boolean ramBelowLimit = ( ramLoad < MAXIMUN_RAM_TO_USE );
+		return ( load < ACCEPTABLE_LOWER_LIMIT ) && ramBelowLimit;
 	}
 	
-
-	public static double getLoadsMedium( double value ) {
-		mediumLoad.add( value );
-		if ( mediumLoad.size() > LOADS_MEDIUM_SIZE ) {
-			mediumLoad.remove(0);
-		}
-		Double totalValue = 0.0;
-		for ( Double val : mediumLoad ) {
-			totalValue = totalValue + val;
-		}
-		return totalValue / mediumLoad.size();
-	}	
 
 	public synchronized static void equalize( Configurator configurator, int totalTasksRunning ) {
 		boolean enforceTaskLimitToCores = configurator.enforceTaskLimitToCores();
 		if ( enforceTaskLimitToCores ) return;
 		
-		double load = getLoadsMedium ( configurator.getSystemProperties().getCpuLoad() );
-		//double ramLoad = configurator.getSystemProperties().getMemoryPercent();
+		double load = configurator.getSystemProperties().getCpuLoad();
+		double ramLoad = configurator.getSystemProperties().getMemoryPercent();
 		
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
 
@@ -72,11 +58,11 @@ public class LoadEqualizer {
 
 		boolean acceptable = false;
 		
-		if ( tooHigh(load) ) {
+		if ( tooHigh(load,ramLoad) ) {
 			tooHigh = true;
 		} else 
 		
-		if ( tooLow(load) ) {
+		if ( tooLow(load,ramLoad) ) {
 			tooLow = true;
 		} else {
 			acceptable = true;
@@ -98,7 +84,7 @@ public class LoadEqualizer {
 			testCount = 0;
 			configurator.setActivationsMaxLimit( activationsMaxLimit );
 	
-			logger.debug( "[" + totalTasksRunning + "] Load: " + load + "% (" + where + ") : AML is now " + activationsMaxLimit);
+			logger.debug( "[" + totalTasksRunning + "] RAM Load: " + ramLoad + "% | CPU Load: " + load + "% (" + where + ") : AML is now " + activationsMaxLimit);
 			
 		} else {
 			//logger.debug(" Nothing was changed: " + testCount );

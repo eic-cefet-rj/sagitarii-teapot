@@ -10,6 +10,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -75,7 +76,7 @@ public class Teapot {
 	private void sanitize( Task task ) {
 		if ( configurator.getClearDataAfterFinish() ) {
 			try {
-				FileUtils.deleteDirectory( new File( currentActivation.getNamespace() ) ); 
+				FileUtils.deleteDirectory( new File( currentTask.getActivation().getNamespace() ) ); 
 			} catch ( IOException e ) {
 				debug( "sanitization error: " + e.getMessage() );
 			}
@@ -184,9 +185,9 @@ public class Teapot {
 	}
 	
 	private void executeNext( Task task ) {
-		debug("searching for instance tasks for task " + currentActivation.getExecutor() + " (index " + currentActivation.getOrder() + ") fragment " + currentActivation.getFragment() 
+		debug("searching for instance tasks for task " + currentTask.getActivation().getExecutor() + " (index " + currentTask.getActivation().getOrder() + ") fragment " + currentTask.getActivation().getFragment() 
 				+ " exit code: " + task.getExitCode() + " buffer size: " + task.getSourceData().size());
-		Activation previousActivation = currentActivation;
+		Activation previousActivation = currentTask.getActivation();
 		int nextOrder = previousActivation.getOrder() + 1;
 		String fragmentId = previousActivation.getFragment();
 		if ( (task.getExitCode() == 0) && ( task.getSourceData().size() > 1 ) ) {
@@ -214,7 +215,7 @@ public class Teapot {
 				}
 			}
 		} else {
-			debug("task " + currentActivation.getExecutor() + " have empty buffer or error exit code.");
+			debug("task " + currentTask.getActivation().getExecutor() + " have empty buffer or error exit code.");
 		}
 	}
 	
@@ -234,6 +235,7 @@ public class Teapot {
 		
 		Task task = new Task( activation, execLog );
 		task.setSourceData( activation.getSourceData() );
+		task.setRealStartTime( Calendar.getInstance().getTime() );
 		
 		try {
 			comm.send("activityManagerReceiver", "instanceId=" + activation.getInstanceSerial() + "&response=RUNNING&node=" + tm.getMacAddress() + "&executor" + activation.getExecutor() );
@@ -255,27 +257,26 @@ public class Teapot {
 	* Implementation of ITaskObserver.notify()
 	*/
 	public synchronized void notify( Task task ) {
-		debug("task " + task.getTaskId() + "("+ currentActivation.getExecutor() + ") finished. (" + task.getExitCode() + ")" );
+		debug("task " + task.getTaskId() + "("+ currentTask.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
 			
-			// TODO: Activation act = task.getActivation();  // Check if it is equals to currentActivation 
-			
-			Activation act = currentActivation;
+			Activation act = task.getActivation();
 			act.setStatus( TaskStatus.FINISHED );
+			task.setRealFinishTime( Calendar.getInstance().getTime() );
 			
 			
 			// Check output file
 			if ( !validateProduct( act ) ) {
-				error(currentActivation.getExecutor() + ": NO OUTPUT CSV DATA FOUND");
+				error(currentTask.getActivation().getExecutor() + ": NO OUTPUT CSV DATA FOUND");
 			} else {
 				debug("product is valid.");
 			}
 				
-			// Send data and files // Do not be tempted to simplify act parameter. It must be this way
+			// Send data and files // Do not be tempted to simplify the "act" parameter. It must be this way
 			// because upload command line passes this parameters too
 			debug("uploading results to Sagitarii...");
 			new Uploader(configurator).uploadCSV("sagi_output.txt", act.getTargetTable(), act.getExperiment(), 
-					act.getNamespace() , task, tm );
+					act.getNamespace(), task, tm );
 
 			debug("uploading to Sagitarii done. Will try to execute next Activity in this Instance");
 			// Run next task in same instance (if exists)
@@ -287,7 +288,7 @@ public class Teapot {
 			
 			debug("all done! leaving execution thread.");
 		} catch ( Exception e ) {
-			error("error finishing task " + task.getApplicationName() + " at " + currentActivation.getNamespace() + " : " + e.getMessage() );
+			error("error finishing task " + task.getApplicationName() + " at " + currentTask.getActivation().getNamespace() + " : " + e.getMessage() );
 		}
 		
 	}
@@ -432,9 +433,13 @@ public class Teapot {
 	 * Eh chamado de tempos em tempos para enviar os dados da maquina ao Sagitarii.
 	 * Ao fazer isso, o Sagitarii poderah enviar uma nova tarefa.
 	 */
-	public void process( String response ) throws Exception {
+	public void process( String hexResp ) throws Exception {
 		String instanceSerial = "";
 		try {
+			
+			byte[] compressedResp = ZipUtil.toByteArray( hexResp );
+			String response = ZipUtil.decompress(compressedResp);
+			
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
 			jobPool.addAll( acts );
@@ -442,7 +447,6 @@ public class Teapot {
 			boolean found = false;
 			for ( Activation act : acts ) {
 				if( act.getOrder() == 0 ) {
-					
 					currentActivation = act;
 					found = true;
 					debug("execute first task in instance " + act.getInstanceSerial() );
@@ -460,6 +464,8 @@ public class Teapot {
 				error("no activities found in instance ");
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			error( "error starting process: " + e.getMessage() );
 			comm.send("activityManagerReceiver", "instanceId=" + instanceSerial + "&response=CANNOT_EXEC&node=" + tm.getMacAddress() );
 		}

@@ -59,7 +59,7 @@ public class SystemProperties  {
 	private String jriPath;
 	private String localStorage;
 	private List<Double> mediumLoad = new ArrayList<Double>();
-	private final int LOADS_MEDIUM_SIZE = 30;
+	private final int LOADS_MEDIUM_SIZE = 100;
 	private static List<Double> mediumRamLoad = new ArrayList<Double>();
 
 	
