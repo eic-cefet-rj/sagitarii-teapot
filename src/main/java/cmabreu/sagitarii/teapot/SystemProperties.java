@@ -60,6 +60,20 @@ public class SystemProperties  {
 	private String localStorage;
 	private List<Double> mediumLoad = new ArrayList<Double>();
 	private final int LOADS_MEDIUM_SIZE = 30;
+	private static List<Double> mediumRamLoad = new ArrayList<Double>();
+
+	
+	private double getRamLoadsMedium( double value ) {
+		mediumRamLoad.add( value );
+		if ( mediumRamLoad.size() > LOADS_MEDIUM_SIZE ) {
+			mediumRamLoad.remove(0);
+		}
+		Double totalValue = 0.0;
+		for ( Double val : mediumRamLoad ) {
+			totalValue = totalValue + val;
+		}
+		return totalValue / mediumRamLoad.size();
+	}	
 
 	private double getLoadsMedium( double value ) {
 		mediumLoad.add( value );
@@ -72,6 +86,7 @@ public class SystemProperties  {
 		}
 		return totalValue / mediumLoad.size();
 	}	
+	
 	public String getLocalStorage() {
 		return localStorage;
 	}
@@ -80,6 +95,14 @@ public class SystemProperties  {
     	return this.osType;
     }
     
+	public double getMemoryPercent( ) {
+		double percent = 0;
+		try {
+			percent = Math.round( (freeMemory * 100 ) / totalMemory );
+		} catch ( Exception ignored ) {}
+		return getRamLoadsMedium( percent );
+	}
+
     private double getProcessCpuLoad() {
     	double finalValue = 0.0;
     	try {

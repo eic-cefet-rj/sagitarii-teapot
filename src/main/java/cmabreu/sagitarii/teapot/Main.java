@@ -210,7 +210,7 @@ public class Main {
 									
 									response = communicator.announceAndRequestTask( configurator.getSystemProperties().getCpuLoad(), 
 											configurator.getSystemProperties().getFreeMemory(), configurator.getSystemProperties().getTotalMemory(),
-											packageSize );
+											packageSize, configurator.getSystemProperties().getMemoryPercent() );
 									
 									if ( response.length() > 0 ) {
 										logger.debug("Sagitarii answered " + response.length() + " bytes");
@@ -313,6 +313,7 @@ public class Main {
 		data.append( generateJsonPair( "cpuLoad" , String.valueOf( configurator.getSystemProperties().getCpuLoad() ) ) + "," );
 		data.append( generateJsonPair( "freeMemory" , String.valueOf( configurator.getSystemProperties().getFreeMemory() ) ) + "," );
 		data.append( generateJsonPair( "totalMemory" , String.valueOf( configurator.getSystemProperties().getTotalMemory() ) ) + "," );
+		data.append( generateJsonPair( "memoryPercent" , String.valueOf( configurator.getSystemProperties().getMemoryPercent() ) ) + "," );
 		data.append( generateJsonPair( "totalDiskSpace" , String.valueOf( configurator.getSystemProperties().getTotalDiskSpace() ) ) + "," );
 		data.append( generateJsonPair( "freeDiskSpace" , String.valueOf( configurator.getSystemProperties().getFreeDiskSpace() ) ) + "," );
 		data.append( generateJsonPair( "maximunLimit" , String.valueOf( configurator.getActivationsMaxLimit() ) ) + "," );

@@ -8,7 +8,7 @@
 
 <!DOCTYPE configuration [
 	<!ELEMENT configuration (cluster,proxy) >
-	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,activationsMaxLimit,activationShowConsole,clearDataAfterFinish,
+	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,activationsMaxLimit,rPath,activationShowConsole,clearDataAfterFinish,
 		CSVDelimiter,storageHost,storagePort,fileSenderDelay, useSpeedEqualizer, enforceTaskLimitToCores)>
 	<!ELEMENT proxy (useProxy,proxy-host,proxy-port,proxy-password,proxy-user)>
 ]>
@@ -19,6 +19,7 @@
 		<hostURL>http://localhost:8580/sagitarii/</hostURL>
 		<poolIntervalMilliSeconds>1000</poolIntervalMilliSeconds>
 		<activationsMaxLimit>1</activationsMaxLimit>
+		<rPath>C:/rJava/jri</rPath>
 		<activationShowConsole>false</activationShowConsole>
 		<clearDataAfterFinish>false</clearDataAfterFinish>
 		<CSVDelimiter>,</CSVDelimiter>

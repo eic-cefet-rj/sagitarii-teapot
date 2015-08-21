@@ -42,6 +42,7 @@ public class LoadEqualizer {
 		if ( enforceTaskLimitToCores ) return;
 		
 		double load = getLoadsMedium ( configurator.getSystemProperties().getCpuLoad() );
+		//double ramLoad = configurator.getSystemProperties().getMemoryPercent();
 		
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
 
