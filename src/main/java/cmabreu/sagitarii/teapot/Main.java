@@ -90,7 +90,7 @@ public class Main {
 
 	
 	/**
-	 * Teapot entry point
+	 * TaskManager entry point
 	 * 
 	 * EX UNITATE VIRES !
 
@@ -100,7 +100,7 @@ public class Main {
 		boolean wrappersDownloaded = false;
 		try {
 			System.out.println("");
-	    	System.out.println("Sagitarii Teapot Node v1.0.125        23/04/2015");
+	    	System.out.println("Sagitarii TaskManager Node v1.0.125        23/04/2015");
 	    	System.out.println("Carlos Magno Abreu        magno.mabreu@gmail.com");
 			System.out.println("------------------------------------------------");
 			System.out.println("");
@@ -154,7 +154,7 @@ public class Main {
 			communicator = new Communicator( configurator );
 			
 			if ( wrappersDownloaded ) {
-				logger.debug("Teapot started.");
+				logger.debug("TaskManager started.");
 			}
 			
 			
@@ -195,7 +195,7 @@ public class Main {
 						logger.debug("Searching for wrappers...");
 						rm.downloadWrappers();
 						wrappersDownloaded = true;
-						logger.debug("Done. Teapot Started.");
+						logger.debug("Done. TaskManager Started.");
 					} catch ( ConnectException e ) {
 						logger.error("Cannot download wrappers. Skipping.");
 					}
@@ -268,7 +268,7 @@ public class Main {
 			
 			
 		} catch (Exception e) {
-			logger.debug("Critical error. Cannot start Teapot Node.");
+			logger.debug("Critical error. Cannot start TaskManager Node.");
 			logger.debug("Error details:");
 			e.printStackTrace();
 		}
@@ -338,27 +338,27 @@ public class Main {
 	 */
 	private static boolean havePendentCommand() {
 		if ( quiting ) {
-			logger.debug("Teapot is quiting... do not process tasks anymore");
+			logger.debug("TaskManager is quiting... do not process tasks anymore");
 			quit();
 			return true;
 		}
 		if ( restarting ) {
-			logger.debug("Teapot is restarting... do not process tasks anymore");
+			logger.debug("TaskManager is restarting... do not process tasks anymore");
 			restart();
 			return true;
 		}
 		if ( reloading ) {
-			logger.debug("Teapot is reloading wrappers... do not process tasks for now");
+			logger.debug("TaskManager is reloading wrappers... do not process tasks for now");
 			reloadWrappers();
 			return true;
 		}
 		if ( cleaning ) {
-			logger.debug("Teapot is cleaning workspace... do not process tasks for now");
+			logger.debug("TaskManager is cleaning workspace... do not process tasks for now");
 			cleanUp();
 			return true;
 		}
 		
-		// No command is in process. Can free Teapot now...
+		// No command is in process. Can free TaskManager now...
 		return false;
 	}
 	
@@ -402,7 +402,7 @@ public class Main {
 				String[] data = response.split("#");
 				logger.warn("Sagitarii is asking for Instance " + data[1] );
 				inform( data[1] );
-				// No need to stop Teapot or flush buffers... just an information request
+				// No need to stop TaskManager or flush buffers... just an information request
 				// Avoid consider this response as a valid XML instance by returning "TRUE"
 				return true;
 			} 
@@ -422,13 +422,13 @@ public class Main {
 	}
 	
 	/**
-	 * Will restart Teapot
+	 * Will restart TaskManager
 	 * It is a Sagitarii command
 	 */
 	public static void restartApplication() {
 		try {
 		  final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-		  final File currentJar = new File ( Teapot.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+		  final File currentJar = new File ( TaskManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 	
 		  /* is it a jar file? */
 		  if( !currentJar.getName().endsWith(".jar") ) {
@@ -450,7 +450,7 @@ public class Main {
 	}
 
 	/**
-	 * Restart Teapot
+	 * Restart TaskManager
 	 */
 	private static void restart() {
 		restarting = true;
@@ -501,7 +501,7 @@ public class Main {
 	}
 	
 	/**
-	 * Close Teapot
+	 * Close TaskManager
 	 */
 	private static void quit() {
 		quiting = true;

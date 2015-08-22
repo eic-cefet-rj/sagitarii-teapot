@@ -20,7 +20,7 @@ import cmabreu.sagitarii.teapot.comm.Downloader;
 import cmabreu.sagitarii.teapot.comm.FileUnity;
 import cmabreu.sagitarii.teapot.comm.Uploader;
 
-public class Teapot {
+public class TaskManager {
 	private SystemProperties tm;
 	private Communicator comm;
 	private Configurator configurator;
@@ -63,7 +63,7 @@ public class Teapot {
 		return new ArrayList<Task>( tasks );
 	}
 	
-	public Teapot(Communicator comm, Configurator gf) {
+	public TaskManager(Communicator comm, Configurator gf) {
 		this.tm = gf.getSystemProperties();
 		this.comm = comm;
 		this.configurator = gf;
@@ -152,7 +152,7 @@ public class Teapot {
 		message = "[" + executor + "] " + message;
 		try {
 			String parameters = "macAddress=" + tm.getMacAddress() + "&errorLog=" + URLEncoder.encode( message, "UTF-8");
-			comm.send("receiveErrorLog", parameters);
+			comm.send("receiveNodeLog", parameters);
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
@@ -246,7 +246,7 @@ public class Teapot {
 	        task.run( configurator );
 	        
 	        // When finished...
-	        notify( task );
+	        finishAndClose( task );
 	        
 		} catch ( Exception e ) {
 			error("Sagitarii not received task RUNNING response. Maybe offline.");
@@ -256,7 +256,7 @@ public class Teapot {
 	/**
 	* Implementation of ITaskObserver.notify()
 	*/
-	public synchronized void notify( Task task ) {
+	public synchronized void finishAndClose( Task task ) {
 		debug("task " + task.getTaskId() + "("+ currentTask.getActivation().getExecutor() + ") finished. (" + task.getExitCode() + ")" );
 		try {
 			
@@ -429,17 +429,13 @@ public class Teapot {
 	}
 	
 	
-	/**
-	 * Eh chamado de tempos em tempos para enviar os dados da maquina ao Sagitarii.
-	 * Ao fazer isso, o Sagitarii poderah enviar uma nova tarefa.
-	 */
 	public void process( String hexResp ) throws Exception {
 		String instanceSerial = "";
 		try {
 			
 			byte[] compressedResp = ZipUtil.toByteArray( hexResp );
 			String response = ZipUtil.decompress(compressedResp);
-			
+
 			List<Activation> acts = parser.parseActivations( response );
 			executionQueue.addAll( acts );
 			jobPool.addAll( acts );

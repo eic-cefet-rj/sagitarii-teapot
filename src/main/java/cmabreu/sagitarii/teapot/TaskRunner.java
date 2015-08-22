@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import cmabreu.sagitarii.teapot.comm.Communicator;
 
 public class TaskRunner extends Thread {
-	private Teapot teapot;
+	private TaskManager teapot;
 	private Logger logger = LogManager.getLogger( this.getClass().getName() ); 
 	private String serial;
 	private String response;
@@ -75,10 +75,10 @@ public class TaskRunner extends Thread {
 	public TaskRunner( String response, Communicator communicator, Configurator configurator ) {
 		this.communicator = communicator;
 		this.configurator = configurator;
-		this.teapot = new Teapot( communicator, configurator);
+		this.teapot = new TaskManager( communicator, configurator);
 		this.serial = UUID.randomUUID().toString().substring(0, 5).toUpperCase();
 		this.response = response;
-		setName("Teapot Task Runner " + this.serial );
+		setName("TaskManager Task Runner " + this.serial );
 	}
 	
 	public String getTime() {

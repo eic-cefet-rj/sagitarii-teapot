@@ -71,7 +71,7 @@
 			<appender-ref ref="Console"/> 
 		</Logger>
 
-		<Logger name="br.cefetrj.sagitarii.teapot.Teapot" level="error" additivity="false"> 
+		<Logger name="br.cefetrj.sagitarii.teapot.TaskManager" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 

@@ -87,7 +87,7 @@ public class WebClient {
 		HttpGet getRequest = new HttpGet(url);
 		getRequest.addHeader("accept", "application/json");
 		getRequest.addHeader("Content-Type", "plain/text; charset=utf-8");
-		getRequest.setHeader("User-Agent", "Teapot Node");
+		getRequest.setHeader("User-Agent", "TaskManager Node");
 		
 		HttpResponse response = httpClient.execute(getRequest);
 		response.setHeader("Content-Type", "plain/text; charset=UTF-8");

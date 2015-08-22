@@ -35,7 +35,7 @@ public class CommandLoader extends Thread {
 
 		CommandLine jr = new CommandLine();
 		jr.setCommandLinePrompt("teapot> ");
-		jr.setCommandLineVersion("Welcome to Teapot Command Line");
+		jr.setCommandLineVersion("Welcome to TaskManager Command Line");
 		
 		jr.assignClassToCommnd("logger", "cmabreu.sagitarii.teapot.console.commands.LoggerManager");
 		jr.assignClassToCommnd("show", "cmabreu.sagitarii.teapot.console.commands.Show");
