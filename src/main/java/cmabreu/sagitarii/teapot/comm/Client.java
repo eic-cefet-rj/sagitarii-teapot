@@ -74,8 +74,9 @@ public class Client {
 			fragment = task.getActivation().getFragment();
 			exitCode = String.valueOf( task.getExitCode() );
 			taskId = task.getActivation().getTaskId();
-			startTimeMillis = task.getRealStartTime().toString();
-			finishTimeMillis = task.getRealFinishTime().toString();
+			
+			startTimeMillis = String.valueOf( task.getRealStartTime().getTime() );
+			finishTimeMillis = String.valueOf( task.getRealFinishTime().getTime() );
 		}			
 		
 		getSessionKey();
