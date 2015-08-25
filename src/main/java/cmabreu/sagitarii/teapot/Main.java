@@ -203,7 +203,7 @@ public class Main {
 					if ( !paused ) {
 						String response = "NO_DATA";
 						try {
-							LoadEqualizer.equalize( configurator, runners.size() );
+							DynamicLoadBalancer.equalize( configurator, runners.size() );
 							
 							if ( runners.size() < configurator.getActivationsMaxLimit() ) {
 

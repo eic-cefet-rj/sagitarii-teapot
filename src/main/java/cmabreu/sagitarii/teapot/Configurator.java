@@ -52,6 +52,19 @@ public class Configurator {
 	private boolean useSpeedEqualizer;
 	private boolean enforceTaskLimitToCores;
 	private SystemProperties systemProperties;
+	private int DLBFrequency;
+	private int maximunRamToUse;
+	private int maximunCPULimit;
+	private int minimunCPULimit;
+	
+	public int getMaximunCPULimit() {
+		return maximunCPULimit;
+	}
+	
+	public int getMinimunCPULimit() {
+		return minimunCPULimit;
+	}
+	
 	private Logger logger = LogManager.getLogger( this.getClass().getName()  );
 
 	public SystemProperties getSystemProperties() {
@@ -96,6 +109,10 @@ public class Configurator {
 	
 	public boolean getShowConsole() {
 		return this.showConsole;
+	}
+	
+	public int getMaximunRamToUse() {
+		return maximunRamToUse;
 	}
 	
 	public ProxyInfo getProxyInfo() {
@@ -206,6 +223,10 @@ public class Configurator {
 		return rPath;
 	}
 	
+	public int getDLBFrequency() {
+		return DLBFrequency;
+	}
+	
 	public void loadMainConfig()  {
 			
 			NodeList mapconfig = doc.getElementsByTagName("cluster");
@@ -227,6 +248,12 @@ public class Configurator {
 				clearDataAfterFinish = Boolean.parseBoolean( getTagValue("clearDataAfterFinish", mpElement) );
 				useSpeedEqualizer = Boolean.parseBoolean( getTagValue("useSpeedEqualizer", mpElement) );
 				enforceTaskLimitToCores = Boolean.parseBoolean( getTagValue("enforceTaskLimitToCores", mpElement) );
+				DLBFrequency = Integer.valueOf( getTagValue("DLBFrequency", mpElement) );
+				maximunRamToUse = Integer.valueOf( getTagValue("maximunRamToUse", mpElement) );
+
+				maximunCPULimit = Integer.valueOf( getTagValue("maximunCPULimit", mpElement) );
+				minimunCPULimit = Integer.valueOf( getTagValue("minimunCPULimit", mpElement) );
+
 				
 				if ( enforceTaskLimitToCores ) {
 					useSpeedEqualizer = false;

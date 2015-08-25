@@ -1,25 +1,24 @@
 package cmabreu.sagitarii.teapot;
 
-public class LoadEqualizer {
+public class DynamicLoadBalancer {
 	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.LoadEqualizer" ); 
-	private static final int TESTS_BEFORE_CHANGE = 3;
-	private static final int ACCEPTABLE_UPPER_LIMIT = 95;
-	private static final int ACCEPTABLE_LOWER_LIMIT = 90;
-	private static final int MAXIMUN_RAM_TO_USE = 90;
-	
+	private static int MAXIMUN_CPU_LIMIT = 95;
+	private static int MINIMUN_CPU_LIMIT = 90;
 	private static int INITIAL_TASK_LIMIT = 0;
+	private static int DLB_FREQUENCY = 10;
 	private static int defaultMaxLimit = 0;
 	private static int testCount = 0;
 	private static int noTaskCheckCount = 0;
+	private static int MAXIMUN_RAM_TO_USE = 90;
 	
 	public static boolean tooHigh( double load, double ramLoad ) {
 		boolean ramBelowLimit = ( ramLoad < MAXIMUN_RAM_TO_USE );
-		return ( load >= ACCEPTABLE_UPPER_LIMIT ) || ( !ramBelowLimit );
+		return ( load >= MAXIMUN_CPU_LIMIT ) || ( !ramBelowLimit );
 	}
 
 	public static boolean tooLow( double load, double ramLoad ) {
 		boolean ramBelowLimit = ( ramLoad < MAXIMUN_RAM_TO_USE );
-		return ( load < ACCEPTABLE_LOWER_LIMIT ) && ramBelowLimit;
+		return ( load < MINIMUN_CPU_LIMIT ) && ramBelowLimit;
 	}
 	
 
@@ -28,7 +27,16 @@ public class LoadEqualizer {
 		if ( enforceTaskLimitToCores ) return;
 		
 		double load = configurator.getSystemProperties().getCpuLoad();
-		double ramLoad = configurator.getSystemProperties().getMemoryPercent();
+		double ramLoad = 100 - configurator.getSystemProperties().getMemoryPercent();
+		if ( ramLoad < 0 ) {
+			ramLoad = 0;
+		}
+		
+		DLB_FREQUENCY = configurator.getDLBFrequency();
+		MAXIMUN_RAM_TO_USE = configurator.getMaximunRamToUse();
+		MAXIMUN_CPU_LIMIT = configurator.getMaximunCPULimit();
+		MINIMUN_CPU_LIMIT = configurator.getMinimunCPULimit();
+		
 		
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
 
@@ -48,7 +56,7 @@ public class LoadEqualizer {
 
 		if ( totalTasksRunning == 0) {
 			noTaskCheckCount++;
-			if ( noTaskCheckCount > TESTS_BEFORE_CHANGE ) {
+			if ( noTaskCheckCount > DLB_FREQUENCY ) {
 				logger.debug("AML set to default value: " + INITIAL_TASK_LIMIT );
 				activationsMaxLimit = INITIAL_TASK_LIMIT;
 				noTaskCheckCount = 0;
@@ -70,7 +78,7 @@ public class LoadEqualizer {
 		}
 
 		testCount++;
-		if ( !acceptable && ( testCount >= TESTS_BEFORE_CHANGE ) ) {
+		if ( !acceptable && ( testCount >= DLB_FREQUENCY ) ) {
 			
 			String where = "too low ";
 			if ( tooLow ) {
