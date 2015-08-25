@@ -14,7 +14,7 @@ public class LoadEqualizer {
 	
 	public static boolean tooHigh( double load, double ramLoad ) {
 		boolean ramBelowLimit = ( ramLoad < MAXIMUN_RAM_TO_USE );
-		return ( load >= ACCEPTABLE_UPPER_LIMIT ) && ramBelowLimit;
+		return ( load >= ACCEPTABLE_UPPER_LIMIT ) || ( !ramBelowLimit );
 	}
 
 	public static boolean tooLow( double load, double ramLoad ) {
