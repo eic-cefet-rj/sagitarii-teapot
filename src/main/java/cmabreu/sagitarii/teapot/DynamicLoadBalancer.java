@@ -42,6 +42,10 @@ public class DynamicLoadBalancer {
 		
 		
 		int activationsMaxLimit = configurator.getActivationsMaxLimit();
+		if ( activationsMaxLimit > maxLimitToGrow ) {
+			activationsMaxLimit = maxLimitToGrow;
+			configurator.setActivationsMaxLimit( activationsMaxLimit );
+		}
 
 		if ( INITIAL_TASK_LIMIT == 0 ) {
 			INITIAL_TASK_LIMIT = activationsMaxLimit;
@@ -84,7 +88,7 @@ public class DynamicLoadBalancer {
 		if ( !acceptable && ( testCount >= DLB_FREQUENCY ) ) {
 			
 			String where = "too low ";
-			if ( tooLow && ( activationsMaxLimit <= maxLimitToGrow ) ) {
+			if ( tooLow && ( activationsMaxLimit < maxLimitToGrow ) ) {
 				activationsMaxLimit++;
 			}
 			if ( tooHigh && ( activationsMaxLimit > 1 ) ) {
@@ -93,6 +97,7 @@ public class DynamicLoadBalancer {
 			}
 			
 			testCount = 0;
+			
 			configurator.setActivationsMaxLimit( activationsMaxLimit );
 	
 			logger.debug( "[" + totalTasksRunning + "] RAM Load: " + ramLoad + "% | CPU Load: " + load + "% (" + where + ") : AML is now " + activationsMaxLimit);
