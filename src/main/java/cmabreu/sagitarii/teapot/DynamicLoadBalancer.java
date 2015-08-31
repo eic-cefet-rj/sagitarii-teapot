@@ -24,6 +24,9 @@ public class DynamicLoadBalancer {
 
 	public synchronized static void equalize( Configurator configurator, int totalTasksRunning ) {
 		boolean enforceTaskLimitToCores = configurator.enforceTaskLimitToCores();
+		int maxLimitToGrow = configurator.getSystemProperties().getAvailableProcessors() +
+				( configurator.getSystemProperties().getAvailableProcessors() / 2 ) ;
+		
 		if ( enforceTaskLimitToCores ) return;
 		
 		double load = configurator.getSystemProperties().getCpuLoad();
@@ -81,7 +84,7 @@ public class DynamicLoadBalancer {
 		if ( !acceptable && ( testCount >= DLB_FREQUENCY ) ) {
 			
 			String where = "too low ";
-			if ( tooLow ) {
+			if ( tooLow && ( activationsMaxLimit <= maxLimitToGrow ) ) {
 				activationsMaxLimit++;
 			}
 			if ( tooHigh && ( activationsMaxLimit > 1 ) ) {

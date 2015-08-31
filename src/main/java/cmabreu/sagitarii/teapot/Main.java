@@ -100,7 +100,7 @@ public class Main {
 		boolean wrappersDownloaded = false;
 		try {
 			System.out.println("");
-	    	System.out.println("Sagitarii TaskManager Node v1.0.125        23/04/2015");
+	    	System.out.println("Sagitarii Teapot Node v1.0.125        23/04/2015");
 	    	System.out.println("Carlos Magno Abreu        magno.mabreu@gmail.com");
 			System.out.println("------------------------------------------------");
 			System.out.println("");
