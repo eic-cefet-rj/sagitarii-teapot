@@ -78,6 +78,12 @@
 	</repositories>	
 	
 	<dependencies>
+	
+		<dependency>
+			<groupId>org.python</groupId>
+			<artifactId>jython-standalone</artifactId>
+			<version>2.7.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.nuiton.thirdparty</groupId>
@@ -134,7 +140,7 @@
 	
 	<issueManagement>
 		<system>Github</system>
-		<url>https://github.com/eic-cefet-rj/sagitarii-teapot/issues</url>
+		<url>https://github.com/eic-cefet-rj/sagitarii/issues</url>
 	</issueManagement>
 	
 	<ciManagement>

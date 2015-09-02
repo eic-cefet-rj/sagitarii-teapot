@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import cmabreu.sagitarii.teapot.Activation;
+
 public class BashExecutor implements IExecutor {
 	private List<String> console;
 
@@ -13,17 +15,20 @@ public class BashExecutor implements IExecutor {
 	}
 	
 	@Override
-	public int execute(String rScript, String workFolder) {
-		console = new ArrayList<String>();
+	public int execute( Activation activation ) {
+		String command = activation.getCommand();
+		String workFolder = activation.getNamespace();
 		
-		console.add("will start " + rScript);
+		console = new ArrayList<String>();
+		console.add("will start " + command);
+
 		List<String> commands = new ArrayList<String>();
 		int result = 0;
 		File folder = new File( workFolder );
 		
 	    commands.add("/bin/sh");
 	    commands.add("-c");
-	    commands.add( rScript );
+	    commands.add( command );
 		
 	    try {
 			SystemCommandExecutor commandExecutor = new SystemCommandExecutor(commands);

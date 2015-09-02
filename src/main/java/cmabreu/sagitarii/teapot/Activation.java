@@ -43,6 +43,15 @@ public class Activation implements Comparable<Activation> {
 	private String targetTable;
 	private List<FileUnity> files;
 	private TaskStatus status = TaskStatus.QUEUED;
+	private String wrappersFolder;
+	
+	public void setWrappersFolder(String wrappersFolder) {
+		this.wrappersFolder = wrappersFolder;
+	}
+	
+	public String getWrappersFolder() {
+		return wrappersFolder;
+	}
 	
 	public TaskStatus getStatus() {
 		return status;

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import cmabreu.sagitarii.executors.BashExecutor;
+import cmabreu.sagitarii.executors.PythonExecutor;
 
 public class Task {
 	private List<String> sourceData;
@@ -118,8 +119,13 @@ public class Task {
 			if ( activation.getExecutorType().equals("BASH") ) {
 				debug("running Bash Script " + activation.getCommand() );
 				BashExecutor ex = new BashExecutor();
-				exitCode = ex.execute( activation.getCommand(), activation.getNamespace() );
+				exitCode = ex.execute( activation );
 				console = ex.getConsole();
+			} else if ( activation.getExecutorType().equals("PYTHON") ) { 
+				debug("running Python Script " + activation.getCommand() );
+				PythonExecutor py = new PythonExecutor();
+				exitCode = py.execute( activation );
+				console = py.getConsole();
 			} else {
 				debug("running external wrapper " + activation.getCommand() );
 				process = Runtime.getRuntime().exec( activation.getCommand() );

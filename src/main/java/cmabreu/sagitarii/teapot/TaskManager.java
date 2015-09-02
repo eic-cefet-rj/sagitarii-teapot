@@ -164,22 +164,22 @@ public class TaskManager {
 	 * @return o comando da ativacao apos a substituicao das tags
 	 */
 	private String generateCommand( Activation activation ) {
-		String wrapperFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
 		String command = "";
 		String classPathParam = "-Djava.library.path=" + configurator.getSystemProperties().getJriPath();
 		String workFolder = activation.getNamespace();
+		String wrappersFolder = activation.getWrappersFolder();
 		
 		if ( activation.getExecutorType().equals("RSCRIPT") ) {
-			String wrapperCommand = wrapperFolder + "r-wrapper.jar";
-			String scriptFile = wrapperFolder + activation.getCommand();
-			
-			
-			command = "java "+classPathParam+" -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrapperFolder;
+			String wrapperCommand = wrappersFolder + "r-wrapper.jar";
+			String scriptFile = wrappersFolder + activation.getCommand();
+			command = "java "+classPathParam+" -jar "+ wrapperCommand + " " + scriptFile + " " + workFolder + " " + wrappersFolder;
 			
 		} else if ( activation.getExecutorType().equals("BASH") ) {
-			command = wrapperFolder + activation.getCommand() + " " + workFolder + " " + wrapperFolder;
+			command = wrappersFolder + activation.getCommand() + " " + workFolder + " " + wrappersFolder;
+		} else if ( activation.getExecutorType().equals("PYTHON") ) {
+			command = wrappersFolder + activation.getCommand();
 		} else {
-			command = "java "+classPathParam+" -jar " + wrapperFolder + activation.getCommand() + " " + workFolder + " " + wrapperFolder;
+			command = "java "+classPathParam+" -jar " + wrappersFolder + activation.getCommand() + " " + workFolder + " " + wrappersFolder;
 		}
 		return command;
 	}
@@ -196,6 +196,10 @@ public class TaskManager {
 				if( (nextAct.getOrder() == nextOrder) && ( nextAct.getFragment().equals(fragmentId) ) ) {
 					debug( " > accepted." );
 					executionQueue.remove( nextAct );
+
+					String wrappersFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
+					nextAct.setWrappersFolder(wrappersFolder);
+					
 					String newCommand = generateCommand( nextAct );
 					nextAct.setCommand( newCommand );
 					nextAct.setSourceData( task.getSourceData() );
@@ -448,6 +452,10 @@ public class TaskManager {
 					debug("execute first task in instance " + act.getInstanceSerial() );
 					instanceSerial = act.getInstanceSerial();
 					executionQueue.remove(act);
+
+					String wrappersFolder = configurator.getSystemProperties().getTeapotRootFolder() + "wrappers/";
+					act.setWrappersFolder(wrappersFolder);
+					
 					String newCommand = generateCommand( act );
 					act.setCommand( newCommand );
 					saveInputData( act );
