@@ -4,11 +4,14 @@
 	Arquivo de configuração do Sagitarii Teapot v1.0
 	Por: Carlos Magno Abreu em 18/07/2014
 	
+	Changes:
+		08/09/2015 : activationsMaxLimit removed. Now starts 1.
+	
  -->
 
 <!DOCTYPE configuration [
 	<!ELEMENT configuration (cluster,proxy) >
-	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,activationsMaxLimit,rPath,activationShowConsole,clearDataAfterFinish,
+	<!ELEMENT cluster (hostURL,poolIntervalMilliSeconds,rPath,activationShowConsole,clearDataAfterFinish,
 		CSVDelimiter,storageHost,storagePort,fileSenderDelay, useSpeedEqualizer, enforceTaskLimitToCores,
 		DLBFrequency,maximunRamToUse,maximunCPULimit,minimunCPULimit)>
 	<!ELEMENT proxy (useProxy,proxy-host,proxy-port,proxy-password,proxy-user)>
@@ -19,7 +22,6 @@
 	<cluster>
 		<hostURL>http://localhost:8580/sagitarii/</hostURL>
 		<poolIntervalMilliSeconds>1000</poolIntervalMilliSeconds>
-		<activationsMaxLimit>10</activationsMaxLimit>
 		<rPath>C:/rJava/jri</rPath>
 		<activationShowConsole>false</activationShowConsole>
 		<clearDataAfterFinish>false</clearDataAfterFinish>

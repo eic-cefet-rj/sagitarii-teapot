@@ -203,8 +203,6 @@ public class Main {
 					if ( !paused ) {
 						String response = "NO_DATA";
 						try {
-							DynamicLoadBalancer.equalize( configurator, runners.size() );
-							
 							if ( runners.size() < configurator.getActivationsMaxLimit() ) {
 
 								if ( !havePendentCommand() ) {
@@ -249,6 +247,9 @@ public class Main {
 							} else {
 								//
 							}
+
+							DynamicLoadBalancer.equalize( configurator, runners.size() );
+
 						} catch ( Exception e ) {
 							logger.error( "process error: " + e.getMessage() );
 							logger.error( " > " + response );

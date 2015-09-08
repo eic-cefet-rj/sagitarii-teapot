@@ -237,7 +237,7 @@ public class Configurator {
 				CSVDelimiter = getTagValue("CSVDelimiter", mpElement).charAt(0);
 				poolIntervalMilliSeconds = Integer.valueOf( getTagValue("poolIntervalMilliSeconds", mpElement) );
 				
-				activationsMaxLimit = Integer.valueOf( getTagValue("activationsMaxLimit", mpElement) );
+				activationsMaxLimit = 1;
 				storageHost = getTagValue("storageHost", mpElement);
 				rPath = getTagValue("rPath", mpElement);
 				

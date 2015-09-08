@@ -14,7 +14,7 @@
 	
 	<loggers>
 	
-		<Logger name="cmabreu.sagitarii.teapot.LoadEqualizer" level="debug" additivity="false"> 
+		<Logger name="cmabreu.sagitarii.teapot.DynamicLoadBalancer" level="error" additivity="false"> 
 			<appender-ref ref="Console"/> 
 		</Logger>
 

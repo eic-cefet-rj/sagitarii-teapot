@@ -1,7 +1,7 @@
 package cmabreu.sagitarii.teapot;
 
 public class DynamicLoadBalancer {
-	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.LoadEqualizer" ); 
+	private static Logger logger = LogManager.getLogger( "cmabreu.sagitarii.teapot.DynamicLoadBalancer" ); 
 	private static int MAXIMUN_CPU_LIMIT = 95;
 	private static int MINIMUN_CPU_LIMIT = 90;
 	private static int INITIAL_TASK_LIMIT = 0;
